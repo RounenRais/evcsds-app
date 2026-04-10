@@ -1,136 +1,167 @@
 import os
-os.environ["PADDLE_PDX_CACHE_HOME"] = r"C:\paddleocr_models\paddlex"
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 from ultralytics import YOLO
 from paddleocr import PaddleOCR
+from rapidfuzz import fuzz
 
-MODEL_PATH = r"C:\EASIOS\runs\detect\runs\electric_meter_detection3\weights\best.pt"
-IMAGE_FOLDER = r"C:\EASIOS\test_images"
+# ─── Yollar ───────────────────────────────────────────────────────────────────
+# __file__ → "Bu script neredeyse orası"
+# Böylece script hangi bilgisayarda çalışırsa çalışsın yolu otomatik bulur
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "runs", "detect", "runs",
+                          "electric_meter_detection3", "weights", "best.pt")
+
+# ─── Model ve OCR (bir kez yükle, her istekte tekrar yükleme) ─────────────────
+# Bu satırlar modülü import edince çalışır, her analiz isteğinde değil
+# Çünkü model yüklemek ~2-3 saniye sürer, her istekte yaparsak çok yavaş olur
+model = YOLO(MODEL_PATH)
+
+ocr = PaddleOCR(
+    use_textline_orientation=True,
+    lang="tr",
+    device="gpu",
+    text_det_thresh=0.3,
+    text_det_box_thresh=0.4,
+)
 
 
-def ocr_sonuclari_yazdir(ocr_result):
-    text_found = False
+# ─── Yardımcı Fonksiyonlar ────────────────────────────────────────────────────
+
+def ocr_metinleri_topla(ocr_result: list, min_score: float = 0.25) -> list:
+    """
+    PaddleOCR çıktısını temizleyip liste olarak döndürür.
+    print() yok — veriyi döndürüyoruz, API kullanacak.
+
+    Dönen format:
+        [{"text": "1 FAZLI", "score": 0.80}, ...]
+    """
+    metinler = []
     if not ocr_result:
-        print("  Metin okunamadı.")
-        return
+        return metinler
+
     for item in ocr_result:
-        texts = item["rec_texts"]
+        texts  = item["rec_texts"]
         scores = item["rec_scores"]
         for text, score in zip(texts, scores):
             text = text.strip()
-            if score >= 0.25 and len(text) > 1:
-                text_found = True
-                print(f"  {text}   (güven: {score:.2f})")
-    if not text_found:
-        print("  Metin okunamadı.")
+            if score >= min_score and len(text) > 1:
+                metinler.append({"text": text, "score": round(score, 2)})
+
+    return metinler
 
 
-def predict_and_ocr(image_folder):
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(f"YOLO model bulunamadı: {MODEL_PATH}")
+def faz_tespit_et(metinler: list) -> dict:
+    """
+    OCR metinlerinden faz bilgisini çıkarır.
 
-    model = YOLO(MODEL_PATH)
+    Nasıl çalışır:
+        1. Tüm metinleri tek bir string'e birleştirir
+        2. rapidfuzz ile "1 FAZLI" ve "3 FAZLI" ifadelerine benzerlik skoru hesaplar
+        3. En yüksek skora göre karar verir
 
-    ocr = PaddleOCR(
-        use_textline_orientation=True,
-        lang="tr",
-        device="cpu",
-        text_det_thresh=0.3,
-        text_det_box_thresh=0.4,
-    )
+    Dönen format:
+        {"faz": "monofaz", "guvenskor": 92}
+        {"faz": "trifaz",  "guvenskor": 88}
+        {"faz": "belirsiz","guvenskor": 0 }
+    """
+    # Tüm metinleri birleştir → "1 PAZLI 2 TELLIAKTIF 240V LSM10..."
+    tam_metin = " ".join(m["text"] for m in metinler).upper()
 
-    images = [
-        f for f in os.listdir(image_folder)
-        if f.lower().endswith((".jpg", ".jpeg", ".png"))
-        and not f.startswith("result_")
-    ]
+    # rapidfuzz: partial_ratio → kısa ifadeyi uzun metnin içinde arar
+    # Örnek: "1 FAZLI" metinde "1 PAZLI" geçiyorsa → 92 puan verir
+    monofaz_skoru = fuzz.partial_ratio("1 FAZLI", tam_metin)
+    trifaz_skoru  = fuzz.partial_ratio("3 FAZLI", tam_metin)
 
-    if not images:
-        print("Klasörde işlenecek görsel yok.")
-        return
+    ESIK = 70  # 70 puan altı → eşleşme yok say
 
-    for img_name in images:
-        img_path = os.path.join(image_folder, img_name)
-        img = cv2.imread(img_path)
+    if monofaz_skoru >= ESIK or trifaz_skoru >= ESIK:
+        if monofaz_skoru >= trifaz_skoru:
+            return {"faz": "monofaz", "guvenskor": monofaz_skoru}
+        else:
+            return {"faz": "trifaz", "guvenskor": trifaz_skoru}
 
-        if img is None:
-            print(f"Resim okunamadı: {img_name}")
+    return {"faz": "belirsiz", "guvenskor": 0}
+
+
+# ─── Ana Fonksiyon ────────────────────────────────────────────────────────────
+
+def sayac_analiz_et(gorsel_yolu: str) -> dict:
+    """
+    Tek bir fotoğrafı analiz eder, sonucu dict olarak döndürür.
+    FastAPI bu fonksiyonu çağıracak.
+
+    Dönen format:
+    {
+        "sayac_bulundu": True,
+        "yolo_guveni": 0.91,
+        "faz": "monofaz",
+        "faz_guvenskor": 92,
+        "ocr_metinleri": [{"text": "1 FAZLI", "score": 0.80}, ...]
+    }
+    """
+    img = cv2.imread(gorsel_yolu)
+    if img is None:
+        return {"hata": f"Görsel okunamadı: {gorsel_yolu}"}
+
+    # ── Adım 1: YOLO ile sayacı bul ──────────────────────────────────────────
+    results = model.predict(source=gorsel_yolu, conf=0.5, verbose=False)
+
+    sayac_bulundu = False
+    yolo_guveni   = 0.0
+    ocr_metinleri = []
+
+    for result in results:
+        if result.boxes is None or len(result.boxes) == 0:
             continue
 
-        print("\n" + "=" * 60)
-        print(f"Resim: {img_name}")
-        print("=" * 60)
+        # En yüksek güvenli kutuyu al (birden fazla sayaç varsa)
+        en_iyi_box = max(result.boxes, key=lambda b: float(b.conf[0]))
 
-        results = model.predict(source=img_path, conf=0.5, verbose=False)
+        sayac_bulundu = True
+        yolo_guveni   = round(float(en_iyi_box.conf[0]), 2)
+        x1, y1, x2, y2 = map(int, en_iyi_box.xyxy[0])
 
-        crop = None
-        meter_found = False
+        # ── Adım 2: Sayaç bölgesini kırp ─────────────────────────────────────
+        margin = 60
+        h, w   = img.shape[:2]
+        crop   = img[
+            max(0, y1 - margin) : min(h, y2 + margin),
+            max(0, x1 - margin) : min(w, x2 + margin)
+        ]
 
-        for result in results:
-            if result.boxes is None or len(result.boxes) == 0:
-                continue
+        # ── Adım 3: OCR ile yazıları oku ─────────────────────────────────────
+        try:
+            ocr_crop = list(ocr.predict(crop))
+            ocr_metinleri = ocr_metinleri_topla(ocr_crop)
+        except Exception as e:
+            return {"hata": f"OCR hatası: {str(e)}"}
 
-            for i, box in enumerate(result.boxes):
-                meter_found = True
-                conf = float(box.conf[0])
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
+    # ── Adım 4: Faz tespiti ───────────────────────────────────────────────────
+    if sayac_bulundu and ocr_metinleri:
+        faz_sonucu = faz_tespit_et(ocr_metinleri)
+    else:
+        faz_sonucu = {"faz": "belirsiz", "guvenskor": 0}
 
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-                cv2.putText(
-                    img, f"Sayac {conf:.2f}",
-                    (x1, max(30, y1 - 10)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2
-                )
-
-                margin = 60
-                h, w = img.shape[:2]
-                # Renkli crop - OCR için
-                crop = img[
-                    max(0, y1 - margin):min(h, y2 + margin),
-                    max(0, x1 - margin):min(w, x2 + margin)
-                ]
-
-                print(f"\n✅ Sayaç #{i+1} (güven: {conf:.2f})")
-
-                print("\n📋 [CROP] Okunan yazılar:")
-                print("-" * 40)
-                try:
-                    ocr_result_crop = list(ocr.predict(crop))
-                    ocr_sonuclari_yazdir(ocr_result_crop)
-                except Exception as e:
-                    print(f"  OCR hatası: {e}")
-
-                print("\n📋 [TAM RESİM] Okunan yazılar:")
-                print("-" * 40)
-                try:
-                    ocr_result_tam = list(ocr.predict(img))
-                    ocr_sonuclari_yazdir(ocr_result_tam)
-                except Exception as e:
-                    print(f"  OCR hatası: {e}")
-
-        if not meter_found:
-            print("❌ Sayaç bulunamadı.")
-
-        fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-        axes[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        axes[0].set_title(f"Tespit: {img_name}", fontsize=12)
-        axes[0].axis("off")
-
-        if crop is not None:
-            axes[1].imshow(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-            axes[1].set_title("Sayaç Yakın Çekim", fontsize=12)
-            axes[1].axis("off")
-
-        plt.tight_layout()
-        save_path = os.path.join(image_folder, f"result_{img_name}")
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        plt.close(fig)
-        print(f"\nKaydedildi: {save_path}")
+    return {
+        "sayac_bulundu" : sayac_bulundu,
+        "yolo_guveni"   : yolo_guveni,
+        "faz"           : faz_sonucu["faz"],
+        "faz_guvenskor" : faz_sonucu["guvenskor"],
+        "ocr_metinleri" : ocr_metinleri,
+    }
 
 
+# ─── Terminalde test için ─────────────────────────────────────────────────────
 if __name__ == "__main__":
-    predict_and_ocr(IMAGE_FOLDER)
+    import sys
+    import json
+
+    if len(sys.argv) < 2:
+        print("Kullanım: python predict_and_ocr.py <gorsel_yolu>")
+        sys.exit(1)
+
+    gorsel = sys.argv[1]
+    sonuc  = sayac_analiz_et(gorsel)
+    print(json.dumps(sonuc, ensure_ascii=False, indent=2))
