@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['electric-meter-detection']
+
+roboflow:
+  workspace: kemals-workspace-kbc8l
+  project: electric-meter-detection-o4tfi
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/kemals-workspace-kbc8l/electric-meter-detection-o4tfi/dataset/1
