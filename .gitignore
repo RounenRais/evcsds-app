@@ -1,1 +1,4 @@
 /ocrenv
+/.paddlex_cache/
+/temp_uploads/
+**/__pycache__/

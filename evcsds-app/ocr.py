@@ -1,2 +1,0 @@
-from paddleocr.paddleocr import SUPPORT_DET_MODEL, SUPPORT_REC_MODEL
-print(SUPPORT_REC_MODEL)

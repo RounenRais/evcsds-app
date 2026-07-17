@@ -1,0 +1,14 @@
+path: C:/EVCSDS/new_electric_bills_model
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 1
+names: ['electricity-bill']
+
+roboflow:
+  workspace: kemals-workspace-kbc8l
+  project: electricity-bill-zqmlq
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/kemals-workspace-kbc8l/electricity-bill-zqmlq/dataset/2
