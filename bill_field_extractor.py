@@ -47,7 +47,9 @@ ETIKETLER = {
     "sayac_tipi": ("SAYAC TIPI",),
 }
 
-SAYI_DESENI = r"[-+]?\d{1,3}(?:[. ]\d{3})*(?:,\d+)?|[-+]?\d+(?:[.,]\d+)?"
+SAYI_DESENI = (
+    r"[-+]?(?:\d{1,3}(?:[. ]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)(?![\d.,])"
+)
 
 
 def metni_normalize_et(metin: str) -> str:
@@ -216,9 +218,13 @@ def _birlesik_guc_alanini_bul(
     etiketler = [
         m
         for m in metinler + satirlar
-        if "CARPAN" in metni_normalize_et(m["text"])
-        and "DEMAND" in metni_normalize_et(m["text"])
-        and "GUC" in metni_normalize_et(m["text"])
+        # OCR bazen "Çarpan" sözcüğünün ilk harfini düşürüyor ("'arpan").
+        # Bu tolerans yalnızca Demand ve Güç kanıtı da aynı etiketteyse geçerli.
+        # Dar OCR kutularında "ÇarpanDemand" birleşebilir; başlangıç ve
+        # Demand/Güç kanıtı aranır, yalnız komşu sayıdan güç türetilmez.
+        if re.search(r"(?:^|[^A-Z])C?ARPAN", metni_normalize_et(m["text"]))
+        and "DEMAND" in re.sub(r"[^A-Z]", "", metni_normalize_et(m["text"]))
+        and "GUC" in re.sub(r"[^A-Z]", "", metni_normalize_et(m["text"]))
     ]
     for etiket in sorted(etiketler, key=lambda x: x["score"], reverse=True):
         adaylar = []
@@ -292,6 +298,10 @@ def _basit_sayisal_alani_bul(
 ) -> dict | None:
     def filtre(metin: str) -> bool:
         normal = metni_normalize_et(metin)
+        if alan in ("sozlesme_gucu_kw", "donem_tuketimi_kwh") and not re.fullmatch(
+            rf"\s*(?:{SAYI_DESENI})\s*(?:KW|KWH)?\s*", normal
+        ):
+            return False
         return not any(yasak in normal for yasak in yasak_birimler)
 
     def etiket_filtresi(metin: str) -> bool:
@@ -312,9 +322,14 @@ def _basit_sayisal_alani_bul(
                 )
                 and "GUNLUK" not in normal
                 and "ORT" not in normal
+                and "REAKTIF" not in normal
+                and "ENDUKTIF" not in normal
+                and "KAPASITIF" not in normal
             )
         if alan == "sozlesme_gucu_kw":
-            return "GUC" in normal
+            # Çarpan/Demand/Anl. Gücü üçlü alandır. Yakınındaki tek bir
+            # sayı güç kabul edilemez; üçlü değer okunamıyorsa alan boş kalır.
+            return "GUC" in normal and "DEMAND" not in normal
         if alan == "odenecek_tutar_tl":
             return "ODENECEK" in normal
         return True
@@ -342,6 +357,36 @@ def _basit_sayisal_alani_bul(
         "etiket_konum_birim",
         aday["bbox"],
     )
+
+
+def _satir_ici_sozlesme_gucunu_bul(metinler: list[dict]) -> dict | None:
+    desen = re.compile(
+        rf"\b(?:SOZLESME|ANLASMA|ANL\.?|ABONELIK|SOZ)\s+GUC[U]?\s*[:=]?\s*"
+        rf"({SAYI_DESENI})(?=\s|KW\b|$)"
+    )
+    en_iyi = None
+    for metin in metinler:
+        normal = metni_normalize_et(metin["text"])
+        if "DEMAND" in normal:
+            continue
+        eslesme = desen.search(normal)
+        if not eslesme:
+            continue
+        guc = turkce_sayiyi_cevir(eslesme.group(1))
+        if guc is None or not 0.5 <= guc <= 100:
+            continue
+        sonuc = _alan_sonucu(
+            guc,
+            "kW",
+            metin["score"],
+            metin["text"],
+            eslesme.group(1),
+            "satir_ici_sozlesme_gucu",
+            metin["bbox"],
+        )
+        if en_iyi is None or sonuc["guven"] > en_iyi["guven"]:
+            en_iyi = sonuc
+    return en_iyi
 
 
 def _satir_ici_metni_bul(
@@ -396,6 +441,25 @@ def _donem_tuketimini_bul(
         1_000_000.0,
         ("TL",),
     )
+    if (
+        dogrudan
+        and "AKTIF TUKETIM" in metni_normalize_et(dogrudan["etiket"])
+        and any("KADEME" in metni_normalize_et(m["text"]) for m in metinler)
+    ):
+        # Kademeli faturada tek bir Aktif Tüketim satırı toplam tüketim değildir.
+        dogrudan = None
+    if (
+        dogrudan
+        and "TOPLAM TUKETIM" in metni_normalize_et(dogrudan["etiket"])
+        and "KWH" not in metni_normalize_et(dogrudan["ham_deger"])
+        and any(
+            kelime in metni_normalize_et(m["text"])
+            for m in metinler
+            for kelime in ("ENDEKS", "FARK")
+        )
+    ):
+        # Çok sütunlu tabloda ilk veya son endeks fark değeri sanılabilir.
+        dogrudan = None
     if dogrudan and "TEK ZAMAN" not in metni_normalize_et(dogrudan["etiket"]):
         return dogrudan
 
@@ -511,10 +575,56 @@ def _gunluk_ortalamayi_bul(
     return None
 
 
-def _tuketici_grubunu_bul(satirlar: list[dict]) -> dict | None:
+def _tuketici_grubunu_bul(metinler: list[dict], satirlar: list[dict]) -> dict | None:
     temel = _satir_ici_metni_bul("tuketici_grubu", satirlar)
     if not temel:
-        return None
+        # Bazı faturalarda etiket ve değeri OCR iki ayrı kutu olarak döndürür;
+        # aynı satırdaki sağ komşuyu açık tarife kanıtıyla eşleştir.
+        adaylar = []
+        for etiket in metinler:
+            etiket_norm = metni_normalize_et(etiket["text"])
+            if not any(
+                ifade in etiket_norm
+                for ifade in ("TUKETICI GRUBU", "ABONE GRUBU", "TARIFE GRUBU")
+            ):
+                continue
+            ex, ey = _merkez(etiket["bbox"])
+            for deger in metinler:
+                if deger is etiket:
+                    continue
+                normal = metni_normalize_et(deger["text"])
+                if not any(k in normal for k in ("MESKEN", "SANAYI", "TICARETHANE")):
+                    continue
+                dx, dy = _merkez(deger["bbox"])
+                satir_yuksekligi = max(
+                    1,
+                    etiket["bbox"]["y2"] - etiket["bbox"]["y1"],
+                    deger["bbox"]["y2"] - deger["bbox"]["y1"],
+                )
+                etiket_genisligi = max(
+                    1, etiket["bbox"]["x2"] - etiket["bbox"]["x1"]
+                )
+                yatay_bosluk = max(0, deger["bbox"]["x1"] - etiket["bbox"]["x2"])
+                if (
+                    dx <= ex
+                    or abs(dy - ey) > satir_yuksekligi * 1.2
+                    or yatay_bosluk > max(50, etiket_genisligi * 3)
+                ):
+                    continue
+                yakinlik = 1 - abs(dy - ey) / (satir_yuksekligi * 1.2)
+                adaylar.append((yakinlik, deger["score"], etiket, deger))
+        if not adaylar:
+            return None
+        yakinlik, _, etiket, deger = max(adaylar, key=lambda x: (x[0], x[1]))
+        temel = _alan_sonucu(
+            deger["text"],
+            None,
+            etiket["score"] * 0.35 + deger["score"] * 0.45 + yakinlik * 0.20,
+            etiket["text"],
+            deger["text"],
+            "etiket_sag_komsu",
+            _kutu_birlestir([etiket["bbox"], deger["bbox"]]),
+        )
     kutu = temel["bbox"]
     _, temel_y = _merkez(kutu)
     yukseklik = max(1, kutu["y2"] - kutu["y1"])
@@ -553,7 +663,7 @@ def _tarifeyi_siniflandir(tuketici_grubu: dict | None) -> dict | None:
         parcalar.append("tek_zamanli")
     elif "COK ZAMAN" in normal or "UC ZAMAN" in normal:
         parcalar.append("cok_zamanli")
-    if "ALCAK GERILIM" in normal:
+    if "ALCAK GERILIM" in normal or re.search(r"\bA\s*G\b", normal):
         parcalar.append("alcak_gerilim")
     if not parcalar:
         return None
@@ -589,16 +699,18 @@ def fatura_alanlarini_cikar(
     if birlesik:
         alanlar.update(birlesik)
     else:
-        guc = _basit_sayisal_alani_bul(
-            "sozlesme_gucu_kw",
-            metinler,
-            gorsel_genisligi,
-            gorsel_yuksekligi,
-            "kW",
-            0.5,
-            100.0,
-            ("KWH", "TL"),
-        )
+        guc = _satir_ici_sozlesme_gucunu_bul(metinler)
+        if guc is None:
+            guc = _basit_sayisal_alani_bul(
+                "sozlesme_gucu_kw",
+                metinler,
+                gorsel_genisligi,
+                gorsel_yuksekligi,
+                "kW",
+                0.5,
+                100.0,
+                ("KWH", "TL"),
+            )
         if guc:
             alanlar["sozlesme_gucu_kw"] = guc
 
@@ -630,7 +742,7 @@ def fatura_alanlarini_cikar(
     if donem_tuketimi:
         alanlar["donem_tuketimi_kwh"] = donem_tuketimi
 
-    tuketici_grubu = _tuketici_grubunu_bul(satirlar)
+    tuketici_grubu = _tuketici_grubunu_bul(metinler, satirlar)
     if tuketici_grubu:
         alanlar["tuketici_grubu"] = tuketici_grubu
         tarife = _tarifeyi_siniflandir(tuketici_grubu)
@@ -653,20 +765,29 @@ def fatura_alanlarini_cikar(
         if sonuc:
             alanlar[alan] = sonuc
 
-    kritik = ("sozlesme_gucu_kw", "donem_tuketimi_kwh", "tarife")
+    # KDS V1.1: tüketim ve tarife yardımcı alanlar; eksikleri teknik ön
+    # değerlendirmeyi bloke etmez, fakat isteğe bağlı doğrulanabilir.
+    kritik = ("sozlesme_gucu_kw",)
+    opsiyonel = ("donem_tuketimi_kwh", "tarife")
     eksik = [alan for alan in kritik if alan not in alanlar]
+    eksik_opsiyonel = [alan for alan in opsiyonel if alan not in alanlar]
     dusuk_guven = [
         alan for alan, sonuc in alanlar.items() if sonuc.get("guven", 0) < 0.70
     ]
-    manuel_alanlar = sorted(set(eksik + dusuk_guven))
+    manuel_alanlar = sorted(set(eksik + [a for a in dusuk_guven if a in kritik]))
+    opsiyonel_dogrulama = sorted(
+        set(eksik_opsiyonel + [a for a in dusuk_guven if a in opsiyonel])
+    )
     ozet = {alan: sonuc["deger"] for alan, sonuc in alanlar.items()}
     return {
         "sirket": {"deger": sirket, "guven": round(sirket_guveni, 2)},
         "ozet": ozet,
         "alanlar": alanlar,
         "eksik_kritik_alanlar": eksik,
+        "eksik_opsiyonel_alanlar": eksik_opsiyonel,
         "dusuk_guvenli_alanlar": dusuk_guven,
         "manuel_giris_gerekli": bool(manuel_alanlar),
         "manuel_giris_alanlari": manuel_alanlar,
+        "opsiyonel_dogrulama_alanlari": opsiyonel_dogrulama,
         "yontem": "koordinatli_ocr_etiket_konum_sablon_dogrulama",
     }

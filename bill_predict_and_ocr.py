@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import threading
 import unicodedata
@@ -64,7 +65,19 @@ def _fatura_ocr_dogrulama_skoru(metinler: list[dict]) -> int:
 def _alan_cikarma_sonucu(metinler: list[dict], img) -> dict:
     yukseklik, genislik = img.shape[:2]
     try:
-        return fatura_alanlarini_cikar(metinler, genislik, yukseklik)
+        sonuc = fatura_alanlarini_cikar(metinler, genislik, yukseklik)
+        guc = (sonuc.get("alanlar") or {}).get("sozlesme_gucu_kw")
+        if guc is None or guc.get("guven", 0) < 0.70:
+            ek_metinler = _hedefli_guc_ocr(metinler, img)
+            if ek_metinler:
+                ikinci = fatura_alanlarini_cikar(
+                    metinler + ek_metinler, genislik, yukseklik
+                )
+                ikinci_guc = (ikinci.get("alanlar") or {}).get("sozlesme_gucu_kw")
+                if ikinci_guc and ikinci_guc.get("guven", 0) >= 0.70:
+                    ikinci["yontem"] += "+hedefli_guc_ocr"
+                    return ikinci
+        return sonuc
     except Exception:
         return {
             "sirket": {"deger": "bilinmiyor", "guven": 0.0},
@@ -72,18 +85,64 @@ def _alan_cikarma_sonucu(metinler: list[dict], img) -> dict:
             "alanlar": {},
             "eksik_kritik_alanlar": [
                 "sozlesme_gucu_kw",
-                "donem_tuketimi_kwh",
-                "tarife",
             ],
+            "eksik_opsiyonel_alanlar": ["donem_tuketimi_kwh", "tarife"],
             "dusuk_guvenli_alanlar": [],
             "manuel_giris_gerekli": True,
             "manuel_giris_alanlari": [
                 "sozlesme_gucu_kw",
-                "donem_tuketimi_kwh",
-                "tarife",
             ],
+            "opsiyonel_dogrulama_alanlari": ["donem_tuketimi_kwh", "tarife"],
             "yontem": "alan_cikarma_hatasi",
         }
+
+
+def _hedefli_guc_ocr(metinler: list[dict], img) -> list[dict]:
+    """Bozuk üçlü güç satırını, yalnız görülen etiket çevresinde bir kez büyütür."""
+    yukseklik, genislik = img.shape[:2]
+    if genislik > 2200:
+        return []
+    etiketler = []
+    for metin in metinler:
+        bbox = metin.get("bbox")
+        if not bbox:
+            continue
+        normal = re.sub(r"[^A-Z]", "", _metni_normalize_et(metin["text"]))
+        if "ARPAN" in normal and "DEMAND" in normal and "GUC" in normal:
+            etiketler.append(metin)
+    if not etiketler:
+        return []
+    etiket = max(etiketler, key=lambda m: m.get("score", 0))
+    kutu = etiket["bbox"]
+    satir_yuksekligi = kutu["y2"] - kutu["y1"]
+    if satir_yuksekligi <= 0 or satir_yuksekligi > 80:
+        return []
+    ust_pay = max(20, min(29, round(satir_yuksekligi * 0.63)))
+    kenar_pay = max(8, round(genislik * 0.023))
+    x1 = max(0, kutu["x1"] - min(26, ust_pay))
+    x2 = min(genislik, max(kutu["x2"] + 20, genislik - kenar_pay))
+    y1 = max(0, kutu["y1"] - ust_pay)
+    # Eğik yazıda OCR kutusu gerçek satırın altına taşabilir. Üçlü değerin
+    # altındaki seri numarası satırını almamak için üst kenarı esas al.
+    y2 = min(yukseklik, kutu["y1"] + min(34, satir_yuksekligi + 10))
+    if y2 <= y1 or x1 >= x2:
+        return []
+    kirp = img[y1:y2, x1:x2]
+    buyutulmus = cv2.resize(
+        kirp, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC
+    )
+    try:
+        yeniden_okunan = ocr_calistir(buyutulmus)
+    except Exception:
+        return []
+    for metin in yeniden_okunan:
+        metin["bbox"] = {
+            "x1": x1 + round(metin["bbox"]["x1"] / 3),
+            "y1": y1 + round(metin["bbox"]["y1"] / 3),
+            "x2": x1 + round(metin["bbox"]["x2"] / 3),
+            "y2": y1 + round(metin["bbox"]["y2"] / 3),
+        }
+    return yeniden_okunan
 
 
 def _tam_gorsel_ocr_ile_dogrula(

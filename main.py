@@ -21,6 +21,7 @@ from image_processing import (
     gorseli_hazirla,
     upload_verisini_oku,
 )
+from home_input import kds_ev_girdisi_olustur
 from key_utils import key_gecerli_mi, key_sahibi, key_uret
 from predict_and_ocr import MODEL_PATH as METER_MODEL_PATH
 from predict_and_ocr import sayac_analiz_et
@@ -106,7 +107,7 @@ def root() -> dict:
     return {
         "mesaj": "EVCSDS API çalışıyor",
         "versiyon": "2.0.0",
-        "endpointler": ["/analyze/meter", "/analyze/bill"],
+        "endpointler": ["/analyze/meter", "/analyze/bill", "/analyze/home"],
     }
 
 
@@ -161,3 +162,23 @@ async def analyze_bill(
     return await _gorsel_analiz_et(
         file, x_api_key, fatura_analiz_et, "fatura"
     )
+
+
+@app.post("/analyze/home")
+async def analyze_home(
+    meter_file: UploadFile = File(...),
+    bill_file: UploadFile = File(...),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+) -> dict:
+    """İki görselden KDS home girdisi üretir; ham OCR metinlerini döndürmez."""
+    api_key_dogrula(x_api_key)
+    baslangic = time.perf_counter()
+    sayac_sonucu = await _gorsel_analiz_et(
+        meter_file, x_api_key, sayac_analiz_et, "sayac"
+    )
+    fatura_sonucu = await _gorsel_analiz_et(
+        bill_file, x_api_key, fatura_analiz_et, "fatura"
+    )
+    sonuc = kds_ev_girdisi_olustur(sayac_sonucu, fatura_sonucu)
+    sonuc["islem_suresi_ms"] = round((time.perf_counter() - baslangic) * 1000)
+    return sonuc

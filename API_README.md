@@ -27,9 +27,12 @@ PaddleOCR, Windows'ta kararlılık için CPU kullanır. Aynı anda yalnızca bir
 - `GET /health`: model ve CUDA hazır olma durumu
 - `POST /analyze/meter`: sayaç tespiti, OCR ve faz çıkarımı
 - `POST /analyze/bill`: fatura tespiti ve OCR
+- `POST /analyze/home`: sayaç ve faturadan KDS `home` girdisi; ham OCR metni içermez
 - `POST /analyze`: geriye uyumlu sayaç endpoint'i
 
-Bütün analiz endpoint'leri `X-API-Key` header'ı ve `file` multipart alanı ister.
+Tüm analiz endpoint'leri `X-API-Key` header'ı ister. Ayrı sayaç/fatura
+endpoint'leri `file` multipart alanını, birleşik ev endpoint'i ise
+`meter_file` ve `bill_file` alanlarını ister.
 
 ```powershell
 $headers = @{ "X-API-Key" = "API_KEY" }
@@ -40,6 +43,66 @@ Invoke-RestMethod -Method Post `
 ```
 
 OpenAPI arayüzü servis çalışırken `http://127.0.0.1:8000/docs` adresindedir.
+
+## KDS'ye ev girdisi
+
+`/analyze/home` iki dosya alanı ister: `meter_file` ve `bill_file`. Yanıtın
+`home` nesnesi `faz`, `sozlesme_gucu_kw`, `donem_tuketimi_kwh`,
+`gunluk_ortalama_kwh` ve `tarife` alanlarını taşır. Eksik veya düşük güvenli
+alanlar `null`/`belirsiz` olur. `manuel_dogrulama_alanlari` teknik ön
+değerlendirme için gerekli faz veya sözleşme gücü eksikse doldurulur; dönem
+tüketimi ve tarife KDS V1.1'de opsiyoneldir. Bulunan otomatik değerler
+`onay_bekleyen_alanlar` içinde listelenir. Hiçbir OCR alanı kullanıcı onayı
+olmadan kesin KDS verisi sayılamaz: `kdsye_dogrudan_aktarilabilir=false` ve
+`durum=kullanici_onayi_gerekli` (gerekli alan eksikse
+`manuel_dogrulama_gerekli`) döner. Site/KDS sunucusu bu onay adımını ayrıca
+uygulamalıdır. API yanıtı ham OCR metinlerini içermez.
+Ham fatura yanıtında `manuel_giris_alanlari` yalnız zorunlu sözleşme gücünü,
+`opsiyonel_dogrulama_alanlari` ise eksik/düşük güvenli tüketim ve tarifeyi
+gösterir.
+
+```powershell
+$headers = @{ "X-API-Key" = "API_KEY" }
+Invoke-RestMethod -Method Post `
+  -Uri "http://127.0.0.1:8000/analyze/home" `
+  -Headers $headers `
+  -Form @{
+    meter_file = Get-Item "C:\gorseller\sayac.jpg"
+    bill_file = Get-Item "C:\gorseller\fatura.jpg"
+  }
+```
+
+Web arayüzü API anahtarını tarayıcı koduna koymamalıdır; bu uç nokta site
+sunucusundan çağrılmalıdır. Eski `/analyze/meter` ve `/analyze/bill` uçları
+ayrıntılı OCR metinleri içerdiğinden yalnız yetkili sunucu tarafında
+kullanılmalıdır.
+
+## Yayın öncesi fatura değerlendirmesi
+
+`planning/FATURA_SAHA_DOGRULAMA_SABLONU.csv` dosyasında her örnek için
+`fatura_var`, kaynağın bağımsızlığı ve üç alanın gerçek değerleri işaretlenir.
+Manifestteki `testimagelast/` görselleri kişisel belge içerebildiği için Git'e
+eklenmez. Değerlendirme komutları yalnız bu görseller yerel makinede mevcutsa
+çalışır; yeni kurulumda önce izinli ve anonimleştirilmiş test görselleriyle
+manifest yolları güncellenmelidir.
+Mevcut pilotta bazı alanlar yalnız kullanıcı görsel okumasıyla etiketlenmiştir;
+ikinci kişiyle doğrulama henüz tamamlanmamıştır. `dogrulanmadi` doğruluk hesabına girmez;
+`belgede_yok` alanın gerçekten basılı olmadığını belirtir. Sayısal değerleri
+ondalık noktayla girin (`6.408` gibi). Ad, adres, tesisat numarası veya ham OCR
+metni bu tabloya eklenmemelidir.
+
+```powershell
+python bill_release_eval.py --validate-only
+python bill_release_eval.py
+```
+
+Değerlendirme aracı API ile aynı görüntü hazırlama adımını kullanır; OCR
+çıktısını veya görsel kopyalarını kalıcı olarak saklamaz. Doğru dolu, yanlış
+dolu ve kaçırılan alanları ayrı sayar; bağımsız örneklerin sonuçlarını ayrıca
+raporlar. Şablonda sekiz fatura ve mevcut veri setinden dört fatura olmayan
+görsel vardır. Altı güç ve dört tarife etiketi girilmiştir; faturaların
+bağımsızlığı henüz bilinmediği ve dört negatif geliştirme verisi olduğu için yalnız bu şablonla
+yayın kararı verilemez.
 
 ## Görsel sınırları
 

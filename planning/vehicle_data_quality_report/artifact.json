@@ -1,0 +1,489 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "100 Araçlık Veri Setinin Ev Tipi AC Şarj Karar Desteği Açısından Analizi",
+    "description": "Alan doluluğu, AC teknik tutarlılık, provenans ve karar desteği rol sınıflandırması.",
+    "generatedAt": "2026-09-27T13:21:32.618Z",
+    "cards": [
+      {
+        "id": "records_card",
+        "description": "İncelenen benzersiz araç varyantı",
+        "dataset": "headline",
+        "sourceId": "vehicle_dataset_audit",
+        "metrics": [
+          {
+            "label": "Araç varyantı",
+            "field": "records",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "ac_coverage_card",
+        "description": "Genel azami AC güç alanının doluluk oranı",
+        "dataset": "headline",
+        "sourceId": "vehicle_dataset_audit",
+        "metrics": [
+          {
+            "label": "AC güç doluluğu",
+            "field": "ac_coverage",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "wltp_coverage_card",
+        "description": "WLTP tüketim ve menzil alanlarının ortak doluluk oranı",
+        "dataset": "headline",
+        "sourceId": "vehicle_dataset_audit",
+        "metrics": [
+          {
+            "label": "WLTP doluluğu",
+            "field": "wltp_coverage",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "conflicts_card",
+        "description": "Genel ve faza özel AC güç sınırı çelişen kayıt",
+        "dataset": "headline",
+        "sourceId": "vehicle_dataset_audit",
+        "metrics": [
+          {
+            "label": "AC güç çelişkisi",
+            "field": "conflicts",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "verified_card",
+        "description": "Birincil veya Türkiye kaynağıyla doğrulanmış kayıt oranı",
+        "dataset": "headline",
+        "sourceId": "vehicle_dataset_audit",
+        "metrics": [
+          {
+            "label": "Birincil doğrulama",
+            "field": "verified_rate",
+            "format": "percent"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "coverage_chart",
+        "title": "Karar desteği aday alanlarında doluluk",
+        "subtitle": "100 araç; null, boş string ve Bilinmiyor dolu sayılmadı",
+        "showDescription": true,
+        "intent": "comparison",
+        "question": "Ev tipi AC şarj kararında kullanılabilecek aday alanların veri doluluğu nasıl karşılaştırılıyor?",
+        "rationale": "Uzun alan adları ve tek bir ortak oran yatay çubuk grafikle en okunabilir şekilde karşılaştırılır.",
+        "comparisonContext": {
+          "denominator": "100 araç",
+          "grain": "alan",
+          "unit": "oran",
+          "normalization": "dolu kayıt / 100",
+          "semanticFamily": "veri doluluğu"
+        },
+        "type": "horizontalBar",
+        "dataset": "key_field_coverage",
+        "sourceId": "vehicle_dataset_audit",
+        "encodings": {
+          "x": {
+            "field": "field",
+            "type": "nominal",
+            "label": "Alan"
+          },
+          "y": {
+            "field": "coverage",
+            "type": "quantitative",
+            "format": "percent",
+            "label": "Doluluk"
+          },
+          "tooltip": [
+            {
+              "field": "field",
+              "type": "text",
+              "label": "Alan"
+            },
+            {
+              "field": "coverage",
+              "type": "quantitative",
+              "format": "percent",
+              "label": "Doluluk"
+            },
+            {
+              "field": "filled",
+              "type": "quantitative",
+              "format": "number",
+              "label": "Dolu kayıt"
+            },
+            {
+              "field": "missing",
+              "type": "quantitative",
+              "format": "number",
+              "label": "Eksik/Bilinmiyor"
+            },
+            {
+              "field": "role",
+              "type": "text",
+              "label": "Aday rol"
+            }
+          ]
+        },
+        "valueFormat": "percent",
+        "layout": "full",
+        "maxRows": 15,
+        "emptyState": "Doluluk verisi bulunamadı."
+      }
+    ],
+    "sources": [
+      {
+        "id": "vehicle_dataset_audit",
+        "label": "100 araç JSON veri seti, alan şeması ve üretim betiği",
+        "path": "audit.sql",
+        "query": {
+          "description": "100 kayıt üzerinde alan doluluğu, sentinel değerler, benzersizlik ve AC güç-faz-akım çapraz kontrolleri.",
+          "language": "PowerShell",
+          "executed_at": "2026-09-27T13:21:32.618Z",
+          "tables_used": [
+            "planning/ELEKTRIKLI_ARAC_VERITABANI_100_ARAC.json",
+            "planning/create_vehicle_database_template.py",
+            "planning/build_100_vehicle_database.py"
+          ],
+          "filters": [
+            "Tüm 100 kayıt",
+            "Dolu tanımı: null, boş string ve Bilinmiyor hariç",
+            "Güç-akım fizik kontrolü: 230 V tek faz, 400 V üç faz, yüzde 10 tolerans"
+          ],
+          "metric_definitions": [
+            "Doluluk yüzdesi = dolu kayıt / 100",
+            "Dolu değer null, boş string veya Bilinmiyor değildir",
+            "Genel-faz güç çelişkisi = genel azami AC gücün mevcut faz güçlerinin en büyüğünden 0,1 kW üzerinde sapması"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "section_01",
+        "type": "markdown",
+        "body": "# 100 Araçlık Veri Setinin Ev Tipi AC Şarj Karar Desteği Açısından Analizi",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_02",
+        "type": "markdown",
+        "body": "## Teknik özet\n\nİncelenen `ELEKTRIKLI_ARAC_VERITABANI_100_ARAC.json` dosyası 100 benzersiz\nBEV varyantı, 27 marka ve 42 alandan oluşmaktadır. Ev tipi AC şarj cihazının\nteknik uyumluluğunu belirleyen konektör, genel AC güç, faz desteği, tek faz\ngüç/akım ve üç faz destek bilgileri yüksek doluluğa sahiptir. Üç faz güç ve akım\nalanlarındaki 10 boş kayıt, üç faz desteği olmayan aynı 10 araçla tam olarak\nörtüştüğü için beklenen koşullu boşluktur.\n\nVeri seti karar desteğine doğrudan alınmadan önce iki kritik nokta çözülmelidir:\n\n- Renault Twingo E-Tech 27.5 kWh ve MG MGS5 EV 64 kWh kayıtlarında genel azami\n  AC güç `6,6 kW`, tek faz azami güç ise `7,4 kW`dır. Genel üst sınırın faza özel\n  üst sınırdan düşük olması alan tanımlarıyla çelişmektedir.\n- Kaynak metadata'sı 100 kaydın tamamında doludur; ancak tüm kayıtlar tek bir\n  güvenilir ikincil kaynak ailesine dayanmakta, `İkinci kaynak bekleniyor` ve\n  `Orta` güven durumundadır. Üretici Türkiye kaynağıyla doğrulanmış kayıt yoktur.\n\nEnerji ihtiyacı hesabına aday `batarya_kullanilabilir_kwh` alanı %100 doludur;\nWLTP tüketim ve menzil alanları ise %76 doludur. `zamanlanmis_sarj_destegi` hiç\nbilinmemekte, araç üzeri AC şarj cihazının opsiyon durumu yalnız 33 kayıtta\npozitif olarak saptanmakta ve kalan 67 kayıtta `Bilinmiyor`dur.\n\nBu çalışma bir karar algoritması tasarlamaz. Sınıflandırmalar yalnız alanların\nteknik anlamını ve mevcut verinin ev tipi AC şarj seçimine ne ölçüde girdi\nolabileceğini gösterir.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "headline_metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "records_card",
+          "ac_coverage_card",
+          "wltp_coverage_card",
+          "conflicts_card",
+          "verified_card"
+        ]
+      },
+      {
+        "id": "section_03",
+        "type": "markdown",
+        "body": "## Karar desteği adaylarında doluluk çekirdek AC alanlarında güçlü\n\nDoluluk karşılaştırması, teknik uyumluluk ve kullanıcı enerji ihtiyacı için öne\nçıkan alanları aynı 100 araçlık paydada gösterir. Genel AC güç, konektör, faz,\ntek faz güç/akım ve kullanılabilir batarya tam doludur. Üç faz güç/akımındaki\n%90 oranı beklenen koşullu kapsama karşılık gelir; asıl veri boşlukları araç\nüzeri şarj cihazının opsiyon durumu, WLTP değerleri ve zamanlanmış şarjdadır.\nGrafik alanın doğruluğunu değil yalnız veri setindeki bilinen değer oranını\ngösterir.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "coverage_chart_block",
+        "type": "chart",
+        "chartId": "coverage_chart",
+        "layout": "full"
+      },
+      {
+        "id": "section_04",
+        "type": "markdown",
+        "body": "## Kapsam ve ölçüm tanımları\n\n- **Analiz birimi:** Bir elektrikli araç varyantı.\n- **Payda:** Her alan için 100 kayıt.\n- **Dolu:** Değer `null`, boş/yalnız boşluk veya tam olarak `Bilinmiyor` değil.\n- **Doluluk yüzdesi:** `dolu kayıt / 100 × 100`.\n- **Null:** JSON `null` değeri.\n- **Bilinmiyor:** Kontrollü kategorik sentinel değeri.\n- **Boş:** Boş string veya yalnız boşluk içeren string.\n- **Provenans var:** Kaydın `kaynak_tipi`, `kaynak_basligi`, `kaynak_url`,\n  `erisim_tarihi`, `dogrulama_durumu`, `veri_guven_duzeyi` ve `kaynak_notu`\n  alanlarının bulunması. Bu provenans kayıt düzeyindedir; tek tek alanlara ayrı\n  kaynak bağlanmamıştır.\n\nŞema açıklamaları `create_vehicle_database_template.py` içindeki `FIELDS` ve\n`FIELD_GUIDANCE` tanımlarından; sayımlar ve tutarlılık sonuçları doğrudan 100\nkayıtlık JSON dosyasından alınmıştır.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_05",
+        "type": "markdown",
+        "body": "## AC uyumluluk alanları yüksek kapsamlı, iki güç kaydı çelişkili\n\n| Alan | Teknik anlam | Birim | Dolu | Null | Bilinmiyor | Boş | Örnek değerler | Provenans |\n|---|---|---:|---:|---:|---:|---:|---|---|\n| `ac_azami_guc_kw` | Aracın dahili AC şarj cihazının kabul ettiği genel en yüksek AC güç | kW | 100 | 0 | 0 | 0 | `6.6`, `7.4`, `11` (`22` de var) | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_tek_faz_azami_guc_kw` | Tek faz bağlantıda aracın kabul ettiği üst güç | kW | 100 | 0 | 0 | 0 | `6.6`, `7.4` — yalnız 2 farklı değer | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_uc_faz_azami_guc_kw` | Üç faz bağlantıda toplam üst güç | kW | 90 | 10 | 0 | 0 | `11`, `22` — yalnız 2 farklı değer | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_desteklenen_fazlar` | Aracın tek faz veya tek+üç faz kabul yapısı | — | 100 | 0 | 0 | 0 | `Tek ve üç faz`, `Yalnızca tek faz` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_tek_faz_destegi` | Tek fazlı kaynaktan AC şarj olabilme | — | 100 | 0 | 0 | 0 | Yalnız `Evet` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_uc_faz_destegi` | Üç fazlı kaynaktan AC şarj olabilme | — | 100 | 0 | 0 | 0 | `Evet`, `Hayır` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_tek_faz_azami_akim_a` | Tek fazda araç girişinin en yüksek akımı | A | 100 | 0 | 0 | 0 | `29`, `32` — yalnız 2 farklı değer | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_uc_faz_faz_basina_akim_a` | Üç faz şarjda her faz için üst akım | A/faz | 90 | 10 | 0 | 0 | `16`, `32` — yalnız 2 farklı değer | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_konnektor_tipi` | Aracın fiziksel AC giriş tipi | — | 100 | 0 | 0 | 0 | Yalnız `Type 2` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `onboard_charger_opsiyonel_mi` | Yazılan dahili AC şarj cihazının standart mı opsiyon mu olduğu | — | 33 | 0 | 67 | 0 | `Evet`, `Bilinmiyor`; `Hayır` yok | Kayıt düzeyinde var; alan düzeyinde yok |\n| `ac_sarj_notu` | Ülke, paket, yazılım ve opsiyon istisnaları | — | 100 | 0 | 0 | 0 | Standart faz tablosu notu; opsiyon/ülke farkı ekli not — yalnız 2 şablon | Kayıt düzeyinde var; alan düzeyinde yok |\n\nGenel bir `ac_azami_akim_a` alanı bulunmamaktadır. “AC maksimum akım” iki farklı\nbağlama ayrılmıştır: tek faz için `ac_tek_faz_azami_akim_a`, üç faz için faz\nbaşına `ac_uc_faz_faz_basina_akim_a`. Karar desteği açısından doğru ayrım budur;\niki değer toplanarak tek bir akım gibi yorumlanmamalıdır.\n\nAC alan dağılımları:\n\n- Genel azami AC güç: 82 araç `11 kW`, 8 araç `22 kW`, 6 araç `7,4 kW`, 4 araç\n  `6,6 kW`.\n- Faz yapısı: 90 araç tek ve üç faz, 10 araç yalnız tek faz.\n- Tek faz: 98 araç `7,4 kW / 32 A`, 2 araç `6,6 kW / 29 A` olarak kayıtlıdır.\n- Üç faz destekleyen 90 aracın 82'si `11 kW / 16 A/faz`, 8'i\n  `22 kW / 32 A/faz`dır.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_06",
+        "type": "markdown",
+        "body": "## Batarya ve WLTP alanları enerji ihtiyacını destekliyor, WLTP kapsamı %76\n\n| Alan | Teknik anlam | Birim | Dolu | Null | Bilinmiyor | Boş | Örnek değerler | Provenans |\n|---|---|---:|---:|---:|---:|---:|---|---|\n| `batarya_kullanilabilir_kwh` | Kullanıcının normal doluluk aralığında kullanabildiği net batarya enerjisi | kWh | 100 | 0 | 0 | 0 | `24`, `79`, `112` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `batarya_brut_kwh` | Bataryanın açıklanan toplam teorik kapasitesi | kWh | 100 | 0 | 0 | 0 | `24.3`, `84`, `117` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `wltp_tuketim_kwh_100km` | WLTP birleşik testinde 100 km başına enerji tüketimi | kWh/100 km | 76 | 24 | 0 | 0 | `12.2`, `15.1`, `20.4` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `wltp_menzil_km` | Tam dolu bataryayla WLTP birleşik menzili | km | 76 | 24 | 0 | 0 | `226`, `623`, `912` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `test_standardi` | Menzil ve tüketimin ölçüm standardı | — | 76 | 0 | 24 | 0 | `WLTP`, `Bilinmiyor` | Kayıt düzeyinde var; alan düzeyinde yok |\n| `batarya_tuketim_notu` | Jant, donanım, aralık veya veri eksikliği açıklaması | — | 100 | 0 | 0 | 0 | WLTP TEL/TEH uyarısı; WLTP bulunamadı notu — yalnız 2 şablon | Kayıt düzeyinde var; alan düzeyinde yok |\n\nKullanılabilir kapasite hiçbir kayıtta brüt kapasiteyi aşmamaktadır. WLTP\ntüketimi, menzili ve standardı aynı 76 kayıtta birlikte bulunmakta; diğer 24\nkayıtta tüketim ve menzil `null`, standart `Bilinmiyor`dur. Bu üç alan arasında\nçapraz çelişki tespit edilmemiştir.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_07",
+        "type": "markdown",
+        "body": "## Zamanlanmış şarj verisi kullanılamıyor; DC ve çift yönlü alanlar temel AC seçimi dışında\n\n| Alan | Açıklama | Birim | Dolu | Null | Bilinmiyor | Boş | Örnek değerler | AC seçimindeki konumu |\n|---|---|---:|---:|---:|---:|---:|---|---|\n| `zamanlanmis_sarj_destegi` | Araç veya üretici uygulaması üzerinden saat planlama desteği | — | 0 | 0 | 100 | 0 | Yalnız `Bilinmiyor` | Akıllı zamanlama gereksinimi için yardımcı olabilirdi; mevcut veri kullanılamaz |\n| `dc_konnektor_tipi` | Hızlı DC bağlantı tipi | — | 100 | 0 | 0 | 0 | Yalnız `CCS Combo 2` | Temel ev tipi AC cihaz seçimi için muhtemelen gereksiz |\n| `dc_azami_guc_kw` | Aracın tepe DC hızlı şarj gücü | kW | 100 | 0 | 0 | 0 | `40`, `180`, `400` | Ev tipi AC güç sınırını belirlemez |\n| `dc_10_80_sure_dakika` | Uygun DC istasyonda %10–80 süresi | dakika | 0 | 100 | 0 | 0 | Yalnız `null` | Hem kapsam dışı hem kullanılamaz |\n| `v2l_destegi` | Araçtan cihaza enerji verme | — | 94 | 0 | 6 | 0 | `Evet`, `Hayır`, `Bilinmiyor` | Temel wallbox güç seçimi için muhtemelen gereksiz |\n| `v2h_destegi` | Araçtan eve çift yönlü enerji verme | — | 85 | 0 | 15 | 0 | `Evet`, `Hayır`, `Bilinmiyor` | Çift yönlü gelecek senaryosu; temel AC seçimi dışında |\n| `v2g_destegi` | Araçtan şebekeye enerji verme | — | 85 | 0 | 15 | 0 | `Evet`, `Hayır`, `Bilinmiyor` | Çift yönlü gelecek senaryosu; temel AC seçimi dışında |\n| `sarj_portu_konumu` | Araç üzerindeki şarj kapağının yeri | — | 95 | 0 | 5 | 0 | `Ön orta`, `Sağ arka`, `Sağ ön` | Cihaz yeri ve kablo uzunluğu için teknik yardımcı girdi |\n\nDC alanları AC wallbox gücüyle karıştırılmamalıdır. Örneğin `dc_azami_guc_kw`\ndeğeri 180 kW olan bir aracın ev tipi AC kabulü yine 11 kW olabilir.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_08",
+        "type": "markdown",
+        "body": "## Bütün 42 alanın doluluk ve provenans envanteri\n\nÖrnek sütununda veri setinde üçten az farklı değer varsa yalnız mevcut farklı\ndeğerler gösterilmiştir. `Bilinmiyor` ve `null` örneğe eklenebilir, ancak dolu\nsayımına dahil edilmemiştir.\n\n| Grup | JSON key | Açıklama | Birim | Dolu | Null | Bilinmiyor | Boş | 3 farklı örnek | Provenans durumu |\n|---|---|---|---:|---:|---:|---:|---:|---|---|\n| Araç kimliği | `vehicle_id` | Araç varyantına ait benzersiz ve değişmez kimlik | — | 100 | 0 | 0 | 0 | `EU_EVDB_3305_T10F_LONG_RANGE_RWD`; `EU_EVDB_1830_KONA_ELECTRIC_65_KWH_MY24_25`; `EU_EVDB_1945_600E` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `marka` | Üretici/marka adı | — | 100 | 0 | 0 | 0 | `Audi`; `BMW`; `BYD` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `model` | Ticari model adı olarak tasarlanan alan | — | 100 | 0 | 0 | 0 | `T10F Long Range RWD`; `Kona Electric 65 kWh (MY24-25)`; `600e` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `versiyon` | Batarya, çekiş ve şarj donanımını ayıran tam sürüm | — | 100 | 0 | 0 | 0 | `T10F Long Range RWD`; `Kona Electric 65 kWh (MY24-25)`; `600e` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `model_yili_baslangic` | Teknik özelliklerin geçerli olmaya başladığı model yılı | yıl | 100 | 0 | 0 | 0 | `2020`; `2023`; `2024` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `model_yili_bitis` | Teknik özelliklerin geçerliliğinin bittiği model yılı | yıl | 0 | 100 | 0 | 0 | `null` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `pazar` | Teknik özelliklerin geçerli olduğu satış pazarı | — | 100 | 0 | 0 | 0 | Yalnız `Avrupa` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `arac_tipi` | BEV/PHEV ayrımı | — | 100 | 0 | 0 | 0 | Yalnız `BEV` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `uretim_durumu` | Güncel üretim/satış durumu | — | 100 | 0 | 0 | 0 | Yalnız `Satışta` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Araç kimliği | `varyant_notu` | Pazar, paket, jant ve varyant açıklaması | — | 100 | 0 | 0 | 0 | Audi A6 Avant; Audi A6 Sportback; Audi Q6 Sportback için Avrupa varyant notları | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_konnektor_tipi` | Fiziksel AC giriş tipi | — | 100 | 0 | 0 | 0 | Yalnız `Type 2` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_azami_guc_kw` | Genel en yüksek AC kabul gücü | kW | 100 | 0 | 0 | 0 | `6.6`; `7.4`; `11` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_desteklenen_fazlar` | Desteklenen faz yapısı | — | 100 | 0 | 0 | 0 | `Tek ve üç faz`; `Yalnızca tek faz` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_tek_faz_destegi` | Tek faz desteği | — | 100 | 0 | 0 | 0 | Yalnız `Evet` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_tek_faz_azami_guc_kw` | Tek faz üst gücü | kW | 100 | 0 | 0 | 0 | `6.6`; `7.4` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_tek_faz_azami_akim_a` | Tek faz üst akımı | A | 100 | 0 | 0 | 0 | `29`; `32` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_uc_faz_destegi` | Üç faz desteği | — | 100 | 0 | 0 | 0 | `Evet`; `Hayır` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_uc_faz_azami_guc_kw` | Üç faz toplam üst gücü | kW | 90 | 10 | 0 | 0 | `11`; `22`; `null` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_uc_faz_faz_basina_akim_a` | Üç fazda faz başına üst akım | A/faz | 90 | 10 | 0 | 0 | `16`; `32`; `null` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `onboard_charger_opsiyonel_mi` | Dahili AC şarj donanımının opsiyon durumu | — | 33 | 0 | 67 | 0 | `Evet`; `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| AC şarj | `ac_sarj_notu` | Paket/ülke/yazılım/opsiyon istisna notu | — | 100 | 0 | 0 | 0 | Temel faz tablosu notu; opsiyon/ülke farkı ekli not | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Batarya | `batarya_brut_kwh` | Toplam teorik batarya kapasitesi | kWh | 100 | 0 | 0 | 0 | `24.3`; `84`; `117` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Batarya | `batarya_kullanilabilir_kwh` | Normal kullanımda kullanılabilen net kapasite | kWh | 100 | 0 | 0 | 0 | `24`; `79`; `112` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Tüketim | `wltp_tuketim_kwh_100km` | WLTP birleşik tüketim | kWh/100 km | 76 | 24 | 0 | 0 | `12.2`; `15.1`; `20.4` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Tüketim | `wltp_menzil_km` | WLTP birleşik menzil | km | 76 | 24 | 0 | 0 | `226`; `623`; `912` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Tüketim | `test_standardi` | Menzil/tüketim ölçüm standardı | — | 76 | 0 | 24 | 0 | `WLTP`; `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Tüketim | `batarya_tuketim_notu` | Değer aralığı, donanım ve eksik veri notu | — | 100 | 0 | 0 | 0 | TEL/TEH uyarısı; WLTP bulunamadı notu | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `dc_konnektor_tipi` | DC hızlı şarj bağlantı tipi | — | 100 | 0 | 0 | 0 | Yalnız `CCS Combo 2` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `dc_azami_guc_kw` | Tepe DC şarj gücü | kW | 100 | 0 | 0 | 0 | `40`; `180`; `400` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `dc_10_80_sure_dakika` | DC %10–80 şarj süresi | dakika | 0 | 100 | 0 | 0 | `null` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `zamanlanmis_sarj_destegi` | Araç/uygulama üzerinden zamanlama | — | 0 | 0 | 100 | 0 | `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `v2l_destegi` | Araçtan cihaza enerji aktarımı | — | 94 | 0 | 6 | 0 | `Evet`; `Hayır`; `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `v2h_destegi` | Araçtan eve enerji aktarımı | — | 85 | 0 | 15 | 0 | `Evet`; `Hayır`; `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `v2g_destegi` | Araçtan şebekeye enerji aktarımı | — | 85 | 0 | 15 | 0 | `Evet`; `Hayır`; `Bilinmiyor` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Diğer şarj | `sarj_portu_konumu` | Şarj kapağının araç üzerindeki konumu | — | 95 | 0 | 5 | 0 | `Ön orta`; `Sağ arka`; `Sağ ön` | Kayıt düzeyinde 100/100; alan düzeyinde yok |\n| Provenans | `kaynak_tipi` | Kaynağın güvenilirlik sınıfı | — | 100 | 0 | 0 | 0 | Yalnız `Güvenilir ikincil kaynak` | Provenansın kendisi; 100/100 |\n| Provenans | `kaynak_basligi` | Kullanılan sayfa/belge başlığı | — | 100 | 0 | 0 | 0 | EV Database TOGG T10F; Audi A6 Avant; Hyundai Kona sayfa başlıkları | Provenansın kendisi; 100/100 ve 100 farklı başlık |\n| Provenans | `kaynak_url` | Doğrudan kaynak bağlantısı | — | 100 | 0 | 0 | 0 | EV Database araç `3305`; `1830`; `1945` bağlantıları | Provenansın kendisi; 100/100 ve 100 farklı URL |\n| Provenans | `erisim_tarihi` | Kaynağın kontrol edildiği tarih | tarih | 100 | 0 | 0 | 0 | Yalnız `2026-07-24` | Provenansın kendisi; 100/100 |\n| Provenans | `dogrulama_durumu` | İkinci/resmî kaynak kontrol durumu | — | 100 | 0 | 0 | 0 | Yalnız `İkinci kaynak bekleniyor` | Provenansın kendisi; 100/100 |\n| Provenans | `veri_guven_duzeyi` | Kayıt güven sınıfı | — | 100 | 0 | 0 | 0 | Yalnız `Orta` | Provenansın kendisi; 100/100 |\n| Provenans | `kaynak_notu` | Çelişki, dönüşüm ve doğrulama notu | — | 100 | 0 | 0 | 0 | EV Database derleme ve Türkiye teknik föyüyle doğrulama uyarısı | Provenansın kendisi; 100/100 ancak tek genel şablon |",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_09",
+        "type": "markdown",
+        "body": "## Tutarlılık testlerinde iki yüksek etkili kayıt hatası bulundu\n\n| Kontrol | Sonuç | Etkilenen kayıt | Değerlendirme |\n|---|---:|---:|---|\n| `vehicle_id` benzersizliği | 100 benzersiz / 100 | 0 | Geçti |\n| `kaynak_url` benzersizliği | 100 benzersiz / 100 | 0 | Geçti |\n| Genel AC güç = mevcut faz güçlerinin en büyüğü | 98/100 uyumlu | 2 | **Yüksek:** araç tarafı güç sınırı belirsizleşiyor |\n| Faz etiketi ↔ tek/üç faz destek alanları | 100/100 uyumlu | 0 | Geçti |\n| Destek alanı ↔ faza özel güç/akımın bulunması | 100/100 uyumlu | 0 | Geçti |\n| Tek faz güç ≈ `230 V × I` | 100/100, %10 tolerans | 0 | Geçti |\n| Üç faz güç ≈ `√3 × 400 V × I/faz` | 90/90, %10 tolerans | 0 | Geçti |\n| Kullanılabilir batarya ≤ brüt batarya | 100/100 uyumlu | 0 | Geçti |\n| WLTP tüketim ↔ menzil ↔ standart birlikte bulunma | 100/100 uyumlu | 0 | Geçti |\n| Boş string kullanımı | 0 boş hücre | 0 | Geçti; eksikler null veya `Bilinmiyor` ile temsil edilmiş |\n| Aynı marka+model varyant karşılaştırması | 0 tekrarlı marka+model grubu | — | Sonuç üretilemedi; `model` alanı varyant düzeyinde doldurulmuş |\n| Alan düzeyinde kaynak bağlantısı | Yok | 100 | **Yüksek:** aynı satırdaki her değerin tam olarak hangi kaynak bölümünden geldiği makinece izlenemiyor |\n| Birincil/Türkiye kaynağıyla doğrulama | 0/100 | 100 | **Yüksek:** üretim kullanımına hazır doğrulama yok |\n\nÇelişkili iki kayıt:\n\n| Araç | Genel azami AC | Tek faz azami | Faz yapısı | Opsiyon alanı | Kaynak notunun işareti |\n|---|---:|---:|---|---|---|\n| Renault Twingo E-Tech 27.5 kWh | 6.6 kW | 7.4 kW | Yalnızca tek faz | Evet | Kaynak matrisinde daha yüksek opsiyonel/ülkeye bağlı cihaz bulunduğu belirtiliyor |\n| MG MGS5 EV 64 kWh | 6.6 kW | 7.4 kW | Yalnızca tek faz | Evet | Aynı opsiyonel/ülkeye bağlı cihaz uyarısı |\n\nÜretim betiğindeki standart AC son işlemi, üç faz gücü genel AC güçten yüksekse\ndeğeri düzeltiyor; tek faz gücü genel AC güçten yüksek olan durumu aynı şekilde\nele almıyor. Bu rapor kod değişikliği yapmamış, yalnız mevcut sonucun etkisini\ntespit etmiştir.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "body": "## Model ve varyant ayrımı aynı aile içi karşılaştırmayı engelliyor\n\n`marka + model` birleşiminde tekrar eden hiçbir grup yoktur. Bunun nedeni veri\nsetinde gerçekten aynı model ailesinden yalnız tek araç bulunması olarak\nyorumlanamaz: 100 kaydın 93'ünde `model` ve `versiyon` metinleri birebir aynıdır.\nKalan 7 kayıttaki farklar esas olarak marka yazımındaki diakritik farklarıdır\n(`Citroen/Citroën`, `Skoda/Škoda`).\n\nBu nedenle “aynı marka/modelin varyantları arasında beklenmeyen AC farkı var\nmı?” kontrolü mevcut alanlarla güvenilir şekilde yapılamamaktadır. Örneğin T10X\nStandard Range, Long Range RWD ve Long Range AWD kayıtları insan gözüyle aynı\nmodel ailesine ait görünse de `model` alanında üç ayrı tam varyant adı olarak\ntutulmaktadır. Bu rapor, yeni bir model-aile çıkarım kuralı uydurmamıştır.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "body": "## Eksik değer kullanımı biçimsel olarak tutarlı, bazı alanlarda anlamsal ayrım zayıf\n\nToplam 4.200 veri hücresinde 268 `null`, 232 `Bilinmiyor` ve 0 boş string vardır.\nGenel desen tutarlıdır: sayısal/tarihsel eksikler `null`, kontrollü kategorik\neksikler `Bilinmiyor` olarak tutulmuştur. Ancak şu anlamsal sınırlamalar vardır:\n\n- `model_yili_bitis` alanındaki 100 `null`, “halen geçerli” ile “bitiş yılı\n  bilinmiyor” durumlarını ayırmaz.\n- `onboard_charger_opsiyonel_mi` yalnız pozitif `Evet` veya `Bilinmiyor` üretir;\n  veri setinde `Hayır` yoktur. Bu nedenle standart donanım ile kaynakta\n  opsiyon ifadesinin bulunmaması ayrıştırılamaz.\n- `zamanlanmis_sarj_destegi` 100 kaydın tamamında `Bilinmiyor`dur ve karar\n  desteğinde kullanılamaz.\n- `dc_10_80_sure_dakika` 100 kaydın tamamında `null`dır.\n- Üç faz güç/akımındaki 10 `null`, üç faz desteği `Hayır` olan 10 kayıtla\n  örtüştüğü için tutarlı koşullu boşluktur.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "body": "## Provenans eksiksiz ama kayıt düzeyinde ve henüz ikinci kaynakla doğrulanmamış\n\nHer kayıtta kaynak türü, başlık, URL, erişim tarihi, doğrulama durumu, güven\ndüzeyi ve kaynak notu bulunmaktadır. 100 URL benzersizdir ve tamamı EV Database\naraç sayfalarına aittir. Bununla birlikte:\n\n- Tüm kayıtlar `Güvenilir ikincil kaynak` olarak işaretlidir.\n- Tüm kayıtlar `İkinci kaynak bekleniyor` durumundadır.\n- Tüm kayıtların güven düzeyi `Orta`dır.\n- Pazar alanı 100 kaydın tamamında `Avrupa`dır; Türkiye varyantı olduğu iddia\n  edilmemektedir.\n- Tek bir kayıt için bile alan bazında ayrı kaynak, kaynak sayfasındaki bölüm,\n  ham değer veya dönüşüm kaydı tutulmamıştır.\n- WLTP tüketiminin kaynakta Wh/km olarak okunup 10'a bölünmesi gibi dönüşümler\n  üretim betiğinde vardır; ancak bu dönüşüm her alan kaydının provenansında\n  makinece ayrı işaretlenmez.\n\nBu nedenlerle veri seti sunum ve şema pilotu için izlenebilir, fakat mevcut\ndoğrulama durumuyla üretim kararının tek kaynağı olmamalıdır.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "body": "## Yöntem ve sağlamlık kontrolleri\n\nAlan profili JSON dosyasının doğrudan okunmasıyla çıkarılmıştır. Her alan için\n`null`, boş string ve `Bilinmiyor` ayrı sayılmıştır. Kategorik değerler tam\neşleşmeyle; sayısal değerler JSON sayı tipi üzerinden değerlendirilmiştir.\n\nTutarlılık kuralları:\n\n1. Genel azami AC güç, mevcut tek/üç faz güçlerinin en büyüğüyle ±0,1 kW içinde\n   eşleşmelidir.\n2. `Tek ve üç faz` etiketi iki destek alanında da `Evet`; `Yalnızca tek faz`\n   etiketi tek fazda `Evet`, üç fazda `Hayır` gerektirir.\n3. Destek `Evet` ise ilgili güç ve akım sayısal olmalı; destek `Hayır` ise ilgili\n   güç ve akım `null` olmalıdır.\n4. Tek faz fizik kontrolünde `P = 230 × I / 1000`, üç fazda\n   `P = √3 × 400 × I / 1000` kullanılmış ve yuvarlama için %10 tolerans\n   tanınmıştır. Bu kontrol nominal Avrupa gerilimiyle yalnız bariz kombinasyon\n   hatalarını arar; araç sertifikasyonu değildir.\n5. Kullanılabilir batarya brüt kapasiteyi aşmamalıdır.\n6. WLTP tüketim, menzil ve test standardı birlikte dolu veya birlikte eksik\n   olmalıdır.\n\nZamana bağlı geçmiş sürümler bulunmadığı için zaman içindeki şema/doluluk\ndeğişimi incelenememiştir. Kaynak URL'lerin canlı erişilebilirliği ve üretici\nsayfalarıyla doğruluğu bu yerel veri denetiminin kapsamında test edilmemiştir.\nAlan bazında kesin sayım ve açıklama istendiği için ana kanıt biçimi tablodur;\ntek özet grafik yalnız karar desteğiyle yakından ilişkili alanların doluluk\noranlarını karşılaştırır. Bütün 42 alanı aynı grafiğe sıkıştırmak alan adlarını\nve eksik türlerini okunaksızlaştıracağından tam envanter tablolarda korunmuştur.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_14",
+        "type": "markdown",
+        "body": "## Veri setini karar girdisi yapmadan önce gerekli veri düzeltmeleri\n\nBu maddeler karar algoritması değil, doğrudan tespit edilen veri kalitesi\nsorunlarına yönelik en küçük düzeltmelerdir:\n\n1. İki çelişkili araçta genel ve tek faz AC güç alanlarının hangi donanıma ait\n   olduğu kaynak üzerinden netleştirilmelidir.\n2. `model` alanı model ailesini, `versiyon` alanı tam varyantı temsil edecek\n   şekilde kaynak veriden yeniden ayrıştırılmalıdır; böylece aynı model ailesi\n   içindeki AC farkları denetlenebilir.\n3. Türkiye'de sunulacak varyantlar üretici Türkiye teknik föyü veya kullanım\n   kılavuzuyla ikinci kez doğrulanmalı ve doğrulama alanları güncellenmelidir.\n4. `onboard_charger_opsiyonel_mi` için `Hayır` ile “kaynakta bilgi bulunamadı”\n   ayrımı doğrulanmalıdır.\n5. Kullanılması düşünülüyorsa zamanlanmış şarj alanının 100 kayıtta da gerçek\n   kaynakla doldurulması gerekir; aksi halde karar girdisi olarak seçilmemelidir.\n6. Alan düzeyinde kaynak/ham değer/dönüşüm kaydı bulunması, özellikle AC güç,\n   akım ve WLTP alanlarında denetlenebilirliği artıracaktır.",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_15",
+        "type": "markdown",
+        "body": "## Açık sorular\n\n- İkinci doğrulamada esas alınacak pazar Türkiye mi, Avrupa mı olacaktır?\n- Opsiyonel dahili şarj cihazına sahip araçlarda veri tabanı standart donanımı\n  mı, opsiyonlu donanımı mı ayrı varyant olarak tutacaktır?\n- `model_yili_bitis:null` “halen geçerli” anlamına mı gelecek, yoksa bilinmeyen\n  bitiş yılı için ayrı durum gerekli midir?\n- Zamanlanmış şarj özelliği karar desteğinde kullanılacak mı; kullanılmayacaksa\n  bu alanın toplanması gerekli midir?",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      },
+      {
+        "id": "section_16",
+        "type": "markdown",
+        "body": "## Son özet: alanların ev tipi AC karar desteğindeki aday rolü\n\nRol sütununda yalnız istenen dört sınıf kullanılmıştır. Sınıflandırma alanın\nteknik anlamına dayanır; karar kuralı önermez.\n\n| Alan | Birim | Doluluk % | Karar desteği için aday rol | Veri kalitesi problemi |\n|---|---:|---:|---|---|\n| `vehicle_id` | — | 100% | Yardımcı bilgi | Sorun tespit edilmedi; 100 benzersiz |\n| `marka` | — | 100% | Yardımcı bilgi | Resmî yazım/diakritik normalizasyonu sınırlı |\n| `model` | — | 100% | Yardımcı bilgi | 93 kayıtta `versiyon` ile aynı; model ailesi ayrımı yok |\n| `versiyon` | — | 100% | Yardımcı bilgi | `model` alanıyla büyük ölçüde yineleniyor |\n| `model_yili_baslangic` | yıl | 100% | Yardımcı bilgi | Sorun tespit edilmedi |\n| `model_yili_bitis` | yıl | 0% | Yardımcı bilgi | 100 `null`; devam ediyor/bilinmiyor ayrımı yok |\n| `pazar` | — | 100% | Yardımcı bilgi | Yalnız Avrupa; Türkiye varyant kapsamı yok |\n| `arac_tipi` | — | 100% | Yardımcı bilgi | Yalnız BEV; PHEV kapsamı yok |\n| `uretim_durumu` | — | 100% | Yardımcı bilgi | Yalnız `Satışta`; durum çeşitliliği yok |\n| `varyant_notu` | — | 100% | Yardımcı bilgi | Çoğunlukla ortak Avrupa/Türkiye uyarı şablonu |\n| `ac_konnektor_tipi` | — | 100% | Teknik uyumluluk girdisi | Yalnız Type 2; diğer konektörler test edilmiyor |\n| `ac_azami_guc_kw` | kW | 100% | Teknik uyumluluk girdisi | 2 kayıtta tek faz gücünden düşük |\n| `ac_desteklenen_fazlar` | — | 100% | Teknik uyumluluk girdisi | Boolean alanlarla 100/100 uyumlu |\n| `ac_tek_faz_destegi` | — | 100% | Teknik uyumluluk girdisi | Tüm kayıtlar `Evet`; negatif/unknown örnek yok |\n| `ac_tek_faz_azami_guc_kw` | kW | 100% | Teknik uyumluluk girdisi | 2 kayıtta genel azami güçten yüksek |\n| `ac_tek_faz_azami_akim_a` | A | 100% | Teknik uyumluluk girdisi | Güçle fiziksel uyumsuzluk tespit edilmedi |\n| `ac_uc_faz_destegi` | — | 100% | Teknik uyumluluk girdisi | Faz etiketiyle 100/100 uyumlu |\n| `ac_uc_faz_azami_guc_kw` | kW | 90% | Teknik uyumluluk girdisi | 10 koşullu null, üç fazı desteklemeyen kayıtlarla uyumlu |\n| `ac_uc_faz_faz_basina_akim_a` | A/faz | 90% | Teknik uyumluluk girdisi | 10 koşullu null; güçle uyumsuzluk yok |\n| `onboard_charger_opsiyonel_mi` | — | 33% | Teknik uyumluluk girdisi | 67 `Bilinmiyor`, hiç `Hayır` yok |\n| `ac_sarj_notu` | — | 100% | Yardımcı bilgi | Yalnız 2 genel şablon; alan düzeyi kanıt yok |\n| `batarya_brut_kwh` | kWh | 100% | Yardımcı bilgi | Net kapasiteyle çelişki tespit edilmedi |\n| `batarya_kullanilabilir_kwh` | kWh | 100% | Kullanıcı ihtiyacı hesabı girdisi | Brüt kapasiteyi aşan kayıt yok |\n| `wltp_tuketim_kwh_100km` | kWh/100 km | 76% | Kullanıcı ihtiyacı hesabı girdisi | 24 null; TEL alt sınır seçimi varyanta bağlı belirsizlik taşır |\n| `wltp_menzil_km` | km | 76% | Yardımcı bilgi | 24 null |\n| `test_standardi` | — | 76% | Yardımcı bilgi | 24 `Bilinmiyor`; WLTP eksikleriyle tutarlı |\n| `batarya_tuketim_notu` | — | 100% | Yardımcı bilgi | Yalnız 2 genel not şablonu |\n| `dc_konnektor_tipi` | — | 100% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | Yalnız CCS Combo 2; AC ile karıştırılmamalı |\n| `dc_azami_guc_kw` | kW | 100% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | AC güç sınırını belirlemez |\n| `dc_10_80_sure_dakika` | dakika | 0% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | 100 null |\n| `zamanlanmis_sarj_destegi` | — | 0% | Yardımcı bilgi | 100 `Bilinmiyor`; kullanılamaz |\n| `v2l_destegi` | — | 94% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | 6 `Bilinmiyor` |\n| `v2h_destegi` | — | 85% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | 15 `Bilinmiyor`; çift yönlü sistem ayrı kapsam |\n| `v2g_destegi` | — | 85% | Ev tipi AC şarj seçimi için muhtemelen gereksiz | 15 `Bilinmiyor`; çift yönlü sistem ayrı kapsam |\n| `sarj_portu_konumu` | — | 95% | Teknik uyumluluk girdisi | 5 `Bilinmiyor`; kablo/yerleşim için kullanılabilir |\n| `kaynak_tipi` | — | 100% | Yardımcı bilgi | Tamamı ikincil kaynak |\n| `kaynak_basligi` | — | 100% | Yardımcı bilgi | Kayıt düzeyi; alan bazında kaynak ayrımı yok |\n| `kaynak_url` | — | 100% | Yardımcı bilgi | 100 benzersiz URL; canlı erişim bu denetimde test edilmedi |\n| `erisim_tarihi` | tarih | 100% | Yardımcı bilgi | Tüm kayıtlar aynı tarihte alınmış |\n| `dogrulama_durumu` | — | 100% | Yardımcı bilgi | 100/100 ikinci kaynak bekliyor; doğrulanmış kayıt yok |\n| `veri_guven_duzeyi` | — | 100% | Yardımcı bilgi | 100/100 Orta; Yüksek güvenli kayıt yok |\n| `kaynak_notu` | — | 100% | Yardımcı bilgi | Tek genel not; alan düzeyi dönüşüm/kanıt ayrıntısı yok |",
+        "layout": "full",
+        "sourceId": "vehicle_dataset_audit"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-27T13:21:32.618Z",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {
+          "records": 100,
+          "ac_coverage": 1,
+          "wltp_coverage": 0.76,
+          "conflicts": 2,
+          "verified_rate": 0
+        }
+      ],
+      "key_field_coverage": [
+        {
+          "field": "Zamanlanmış şarj",
+          "coverage": 0,
+          "filled": 0,
+          "missing": 100,
+          "role": "Yardımcı bilgi"
+        },
+        {
+          "field": "OBC opsiyon durumu",
+          "coverage": 0.33,
+          "filled": 33,
+          "missing": 67,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "WLTP tüketim",
+          "coverage": 0.76,
+          "filled": 76,
+          "missing": 24,
+          "role": "Kullanıcı ihtiyacı hesabı girdisi"
+        },
+        {
+          "field": "WLTP menzil",
+          "coverage": 0.76,
+          "filled": 76,
+          "missing": 24,
+          "role": "Yardımcı bilgi"
+        },
+        {
+          "field": "Üç faz azami güç",
+          "coverage": 0.9,
+          "filled": 90,
+          "missing": 10,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Üç faz akım/faz",
+          "coverage": 0.9,
+          "filled": 90,
+          "missing": 10,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "AC konektör",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Azami AC güç",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Desteklenen fazlar",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Tek faz desteği",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Tek faz azami güç",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Tek faz azami akım",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Üç faz desteği",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Teknik uyumluluk girdisi"
+        },
+        {
+          "field": "Kullanılabilir batarya",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Kullanıcı ihtiyacı hesabı girdisi"
+        },
+        {
+          "field": "Brüt batarya",
+          "coverage": 1,
+          "filled": 100,
+          "missing": 0,
+          "role": "Yardımcı bilgi"
+        }
+      ],
+      "consistency_checks": [
+        {
+          "check": "vehicle_id benzersizliği",
+          "affected": 0,
+          "result": "Geçti"
+        },
+        {
+          "check": "Genel AC güç ile faz gücü uyumu",
+          "affected": 2,
+          "result": "Başarısız"
+        },
+        {
+          "check": "Faz etiketi ile destek alanları",
+          "affected": 0,
+          "result": "Geçti"
+        },
+        {
+          "check": "Güç ve akım fizik kontrolü",
+          "affected": 0,
+          "result": "Geçti"
+        },
+        {
+          "check": "Kullanılabilir kapasite brüt kapasiteyi aşmıyor",
+          "affected": 0,
+          "result": "Geçti"
+        },
+        {
+          "check": "WLTP alanları birlikte bulunuyor",
+          "affected": 0,
+          "result": "Geçti"
+        },
+        {
+          "check": "Birincil kaynak doğrulaması",
+          "affected": 100,
+          "result": "Eksik"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "vehicle_dataset_audit",
+      "label": "100 araç JSON veri seti, alan şeması ve üretim betiği",
+      "query": {
+        "description": "100 kayıt üzerinde alan doluluğu, sentinel değerler, benzersizlik ve AC güç-faz-akım çapraz kontrolleri.",
+        "language": "PowerShell",
+        "executed_at": "2026-09-27T13:21:32.618Z",
+        "tables_used": [
+          "planning/ELEKTRIKLI_ARAC_VERITABANI_100_ARAC.json",
+          "planning/create_vehicle_database_template.py",
+          "planning/build_100_vehicle_database.py"
+        ],
+        "filters": [
+          "Tüm 100 kayıt",
+          "Dolu tanımı: null, boş string ve Bilinmiyor hariç",
+          "Güç-akım fizik kontrolü: 230 V tek faz, 400 V üç faz, yüzde 10 tolerans"
+        ],
+        "metric_definitions": [
+          "Doluluk yüzdesi = dolu kayıt / 100",
+          "Dolu değer null, boş string veya Bilinmiyor değildir",
+          "Genel-faz güç çelişkisi = genel azami AC gücün mevcut faz güçlerinin en büyüğünden 0,1 kW üzerinde sapması"
+        ]
+      }
+    }
+  ]
+}
