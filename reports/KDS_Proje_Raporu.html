@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Ev Tipi AC Wallbox Seçimi İçin Temel Karar Destek Sistemi</title>
+<style>
+:root{--ink:#182c3d;--muted:#546674;--accent:#176c77;--light:#edf5f5;--line:#d9e2e6;--paper:#fff}
+*{box-sizing:border-box}body{margin:0;background:#e7ecef;color:var(--ink);font-family:Arial,sans-serif;font-size:10.6pt;line-height:1.48}
+.page{width:210mm;height:297mm;padding:17mm 19mm 18mm;background:var(--paper);margin:8mm auto;position:relative;overflow:hidden;break-after:page}
+.page:last-of-type{break-after:auto}.running{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:3mm;margin-bottom:6mm;color:var(--muted);font-size:8pt;letter-spacing:.6px}
+.tag{color:var(--accent);font-weight:bold;font-size:8.5pt;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:3mm}
+h1{font-size:25pt;line-height:1.14;letter-spacing:-.8px;margin:0 0 4mm}h2{font-size:18pt;line-height:1.2;margin:0 0 5mm;letter-spacing:-.4px}h3{font-size:11.5pt;margin:5mm 0 2mm;color:var(--accent)}p{margin:0 0 3mm}.subtitle{font-size:11.5pt;color:var(--muted);margin:0 0 5mm}.small{font-size:9pt;color:var(--muted)}.callout{background:var(--light);border-left:3px solid var(--accent);padding:3.5mm 4mm;margin:4mm 0}.callout p:last-child{margin:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:5mm 0}.stat{padding:3mm 4mm;background:var(--light);border-radius:2mm}.stat strong{font-size:22pt;color:var(--accent);display:block;line-height:1.1}.stat span{font-size:8.5pt;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:9.5pt;line-height:1.4;margin:3mm 0 4mm}th{text-align:left;font-size:8.5pt;color:#fff;background:var(--accent);padding:2.5mm 2.7mm}td{padding:2.7mm;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:nth-child(even){background:#f6f9fa}.num{text-align:right;white-space:nowrap}.total td{font-weight:bold;background:var(--light)}.rules td{padding:2.6mm;font-size:9.2pt}.rules td:first-child{font-weight:bold;width:15mm;color:var(--accent)}.rules td:nth-child(2){width:43mm}.metrics td{font-size:9.2pt;padding:2.5mm}.metrics td:first-child{width:13mm;font-weight:bold;color:var(--accent)}code{font-family:Consolas,monospace;font-size:.9em;background:#f0f3f5;padding:.3mm 1mm;overflow-wrap:anywhere}pre{background:#182c3d;color:#e7f3f5;border-radius:2mm;padding:4mm;margin:3mm 0;font-family:Consolas,monospace;font-size:9pt;line-height:1.6;white-space:pre-wrap}pre code{background:none;padding:0;color:inherit;font-size:inherit}.formula{font-family:Consolas,monospace;font-size:10pt;color:var(--accent);margin:2mm 0}.steps{margin:2mm 0 3mm;padding-left:6mm}.steps li{margin-bottom:2mm}.footer{position:absolute;bottom:9mm;left:19mm;right:19mm;display:flex;justify-content:space-between;font-size:8pt;color:var(--muted);border-top:1px solid var(--line);padding-top:2.5mm}.caption{font-size:8.5pt;color:var(--muted);margin-top:1mm}.two{display:grid;grid-template-columns:1fr 1fr;gap:5mm}.result{font-size:11pt;font-weight:bold}.refs{font-size:8.3pt;line-height:1.45;margin-top:2mm}.refs p{margin-bottom:1.5mm}.bar{display:flex;gap:1px;height:7mm;border-radius:1mm;overflow:hidden;margin:3mm 0 2mm}.bar span{display:block}.legend{display:flex;flex-wrap:wrap;gap:2mm 4mm;font-size:8pt;color:var(--muted)}.legend b{display:inline-block;width:2.5mm;height:2.5mm;margin-right:1mm}.screen-single .page{margin:0}
+#p5{font-size:10pt;line-height:1.4}#p5 h3{margin-top:4mm}#p5 .refs{font-size:8pt}
+@page{size:A4;margin:0}@media print{body{background:white}.page{margin:0;box-shadow:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<article class="page" id="p1">
+  <div class="running"><span>KDS · BİLGİSAYAR MÜHENDİSLİĞİ PROJE RAPORU</span><span>7 EKİM 2026</span></div>
+  <div class="tag">Temel karar motoru / V1</div>
+  <h1>Ev Tipi AC Wallbox Seçimi İçin Temel Karar Destek Sistemi</h1>
+  <p class="subtitle">Teknik kurallara dayalı aday filtreleme, kullanıcı ihtiyacı metrikleri ve kontrollü senaryolarla doğrulama</p>
+  <div class="stats"><div class="stat"><strong>100</strong><span>araç kaydı</span></div><div class="stat"><strong>30</strong><span>wallbox ürünü</span></div><div class="stat"><strong>85</strong><span>kontrollü test senaryosu</span></div></div>
+  <h3>Özet</h3>
+  <p>Bu çalışmada, elektrikli araçlar için ev tipi AC wallbox seçiminde kullanılabilecek basit bir karar destek motoru geliştirilmiştir. Motor; ev, araç, kullanıcı ve ürün bilgilerini birlikte değerlendirir. Önce teknik kurallarla adayları ayırır, ardından değerlendirmeye devam edilebilen ürünler için günlük enerji ihtiyacı, teorik şarj süresi ve bütçe oranı gibi metrikleri hesaplar.</p>
+  <p>Uygulama, okunabilirliği korumak amacıyla Python fonksiyonlarıyla hazırlanmıştır. 85 kontrollü senaryo üzerinde toplam 2.153 aday değerlendirmesi yapılmış; 2.683 otomatik kontrolün tamamı geçmiştir. Açık beklenen statüsü bulunan 19 teknik sınır testi kaynak sonuçlarla eşleşmiştir. Bu bulgular, mevcut test paketi kapsamındaki temel karar akışını doğrulamaktadır.</p>
+  <p class="small"><strong>Anahtar kelimeler:</strong> karar destek sistemi, elektrikli araç, AC şarj, wallbox, teknik filtreleme, Python.</p>
+  <h3>1. Problem ve amaç</h3>
+  <p>Bir wallboxın yüksek nominal güce sahip olması, her araçta aynı hızın elde edileceği anlamına gelmez. Aracın AC kabul gücü, ürünün faz desteği, evin faz bilgisi ve kurulum yeri birlikte incelenmelidir. Projenin amacı, bu bilgileri açık kurallarla işleyerek hangi ürünlerin değerlendirmeye devam edebileceğini ve hangi bilginin eksik olduğunu göstermektir.</p>
+  <div class="callout"><p><strong>Çalışmanın kapsamı:</strong> Ürünleri teknik durumlarına göre ayırmak ve ihtiyaç metriklerini hesaplamak. Mevcut motor ürünleri sıralamaz; elektrik tesisatı için kurulum onayı vermez.</p></div>
+  <div class="footer"><span>Ev tipi AC wallbox karar destek sistemi</span><span>01 / 05</span></div>
+</article>
+
+<article class="page" id="p2">
+  <div class="running"><span>VERİLER VE KARAR KURALLARI</span><span>TEMEL MOTOR · V1</span></div>
+  <h2>2. Veri yapısı ve teknik filtre</h2>
+  <p>Motor dört veri grubunu kullanır: <strong>ev profili</strong>, <strong>araç kaydı</strong>, <strong>kullanıcı profili</strong> ve <strong>wallbox kataloğu</strong>. Araç ve ürünler kaynak kataloglardan okunur. Ev profilleri ile kullanıcı koşulları kontrollü deney girdileridir; gerçek kullanıcı nüfusunu temsil eden bir örneklem değildir.</p>
+  <p>Pakette 15 ev profili bulunur. Kullanıcının günlük kilometresi, şarja uygun süresi, bütçesi ve kurulum yeri mevcut senaryo alanlarından okunur. Araçların 76’sında WLTP tüketimi doludur; 24’ünde bu alan <code>null</code> kalır. Wallboxların 27’si teknik değerlendirme havuzundadır; 3’ü katalog veri yetersizliği testlerinde kullanılır. TL fiyatı bilinen ürün sayısı 7’dir.</p>
+  <h3>2.1. HR01–HR08 kuralları</h3>
+  <table class="rules"><thead><tr><th>Kural</th><th>Kontrol konusu</th><th>Temel davranış</th></tr></thead><tbody>
+  <tr><td>HR01</td><td>Veri kullanılabilirliği</td><td>Ürünün asgari katalog kanıtı yeterli değilse <code>VERI_YETERSIZ</code>; bu kayıt için işlem burada durur.</td></tr>
+  <tr><td>HR02</td><td>AC konektör</td><td>Açık konektör farkı varsa eleme; eksik konektör bilgisi varsa doğrulama.</td></tr>
+  <tr><td>HR03</td><td>Monofaz ev</td><td>Wallbox tek faz beslemeyi açıkça desteklemiyorsa eleme; destek belirsizse doğrulama.</td></tr>
+  <tr><td>HR04</td><td>Trifaz ev</td><td>Kanıtlı üç faz yolu değerlendirilir. Tek faz wallbox için saha ve faz dengesi doğrulaması gerekir.</td></tr>
+  <tr><td>HR05</td><td>Belirsiz ev fazı</td><td>Faza bağlı güç hesaplanmaz; dış bilgiyle doğrulama istenir.</td></tr>
+  <tr><td>HR06</td><td>Kurulum yeri</td><td>İç/dış mekân uygunluğu “Hayır” ise eleme; “Bilinmiyor” ise doğrulama.</td></tr>
+  <tr><td>HR07</td><td>Araç faz yolu</td><td>Üç faz wallbox ile tek faz araç otomatik elenmez. Çapraz fazda ürün özelinde kanıt aranır.</td></tr>
+  <tr><td>HR08</td><td>Sözleşme gücü</td><td>Güvenli kurulum gücü veya otomatik eleme eşiği olarak kullanılmaz.</td></tr>
+  </tbody></table>
+  <h3>2.2. Sonuç önceliği</h3>
+  <p>HR01 geçildikten sonra açık uyumsuzluk varsa <code>ELE</code> önceliklidir. Açık eleme yoksa ve doğrulanması gereken bilgi varsa <code>DOGRULAMA_GEREKLI</code> üretilir. Bütün uygulanabilir kontroller geçerse <code>DEGERLENDIR</code> elde edilir. Ucuz fiyat veya uzun garanti teknik uyumsuzluğu telafi etmez.</p>
+  <div class="callout"><p><strong>Eksik veri yaklaşımı:</strong> <code>null</code>, “Bilinmiyor” ve “Hayır” aynı değildir. Eksik veri sıfırla doldurulmaz; araç adına bakılarak teknik değer tahmin edilmez.</p></div>
+  <div class="footer"><span>Kaynak: proje kural sözlüğü ve mevcut kataloglar</span><span>02 / 05</span></div>
+</article>
+
+<article class="page" id="p3">
+  <div class="running"><span>TÜRETİLMİŞ METRİKLER</span><span>TEMEL MOTOR · V1</span></div>
+  <h2>3. Kullanıcı ihtiyacının hesaplanması</h2>
+  <p>M01–M06 metrikleri, motorun <code>DEGERLENDIR</code> listesine aldığı ürünlerde hesaplanır. Gerekli bir girdi yoksa ilgili metrik <code>None</code> döndürür; JSON çıktısında bu değer <code>null</code> olarak görünür.</p>
+  <table class="metrics"><thead><tr><th>Kod</th><th>Metrik</th><th>Hesaplama</th></tr></thead><tbody>
+    <tr><td>M01</td><td>Günlük enerji ihtiyacı</td><td>Günlük km × WLTP tüketimi / 100</td></tr>
+    <tr><td>M02</td><td>Teorik etkin AC güç</td><td>Kanıtlı faz yolunda min(araç gücü, wallbox gücü)</td></tr>
+    <tr><td>M03</td><td>Teorik ihtiyaç karşılama süresi</td><td>Günlük enerji / etkin güç</td></tr>
+    <tr><td>M04</td><td>İhtiyaç karşılama oranı</td><td>min(1, etkin güç × uygun süre / günlük enerji)</td></tr>
+    <tr><td>M05</td><td>Nominal kapasite kullanım oranı</td><td>Etkin güç / wallbox nominal gücü</td></tr>
+    <tr><td>M06</td><td>Fiyat / bütçe oranı</td><td>Wallbox fiyatı / kullanıcı bütçesi</td></tr>
+  </tbody></table>
+  <p class="small">Bölme işlemlerinde gerekli paydanın pozitif olması gerekir. Günlük enerji sıfırsa M04 hesaplanmaz. M05’in yüksek olması otomatik olarak “daha iyi ürün” anlamına gelmez.</p>
+  <h3>3.1. Gerçek benchmark örneği: D4-001</h3>
+  <p>Bu senaryoda monofaz ev, TOGG T10F Long Range RWD ve Tesla Wall Connector Gen 3 değerlendirilmiştir. Kullanıcı günlük 30 km gider; araç tüketimi 17,4 kWh/100 km’dir. Evde şarja uygun süre 12 saat, bütçe 30.000 TL’dir. Seçilen araç ve wallboxın tek faz güç sınırı 7,4 kW; wallbox fiyatı 29.670 TL’dir.</p>
+  <div class="two"><div>
+    <p class="formula">M01 = 30 × 17,4 / 100<br><strong>= 5,22 kWh/gün</strong></p>
+    <p class="formula">M02 = min(7,4; 7,4)<br><strong>= 7,4 kW</strong></p>
+    <p class="formula">M03 = 5,22 / 7,4<br><strong>≈ 0,705 saat ≈ 42 dakika</strong></p>
+  </div><div>
+    <p class="formula">M04 = min(1; 7,4 × 12 / 5,22)<br><strong>= 1</strong></p>
+    <p class="formula">M05 = 7,4 / 22<br><strong>≈ 0,336</strong></p>
+    <p class="formula">M06 = 29.670 / 30.000<br><strong>= 0,989</strong></p>
+  </div></div>
+  <div class="callout"><p><strong>Sonuç nasıl okunur?</strong> Teorik günlük ihtiyaç, mevcut park süresinde karşılanabilir. Yaklaşık 42 dakika, bataryayı tamamen doldurma süresi değildir. Fiyat bütçenin yaklaşık %98,9’una karşılık gelir; kurulum ve ek ekipman maliyetlerinin bütçeye uygunluğunu tek başına göstermez.</p></div>
+  <h3>3.2. Gücün anlamı</h3>
+  <p>Bu senaryoda evin sözleşme gücü 3 kW olmasına rağmen M02 hesabına katılmaz. M02 yalnız araç–wallbox zincirinin teorik sınırıdır. Evin fiilen ve güvenli biçimde sağlayabileceği güç; pano, hat, koruma ve eşzamanlı yük gibi ayrı bilgiler gerektirir. Şarj kayıpları için keyfi bir verim katsayısı kullanılmamıştır.</p>
+  <div class="footer"><span>Kaynak: D4-001 senaryosu ve aday metrik çıktısı</span><span>03 / 05</span></div>
+</article>
+
+<article class="page" id="p4">
+  <div class="running"><span>YAZILIMIN ÇALIŞMA MANTIĞI</span><span>TEMEL MOTOR · V1</span></div>
+  <h2>4. Python ile uygulama</h2>
+  <p>Motor dört küçük Python dosyasından oluşur. Fonksiyon tabanlı yapı sayesinde karar akışı takip edilebilir; her sonucun hangi kurala dayandığı kayıt altında tutulur. Uygulama yalnız standart Python kütüphanesini kullanır.</p>
+  <table><thead><tr><th>Dosya</th><th>Görevi</th></tr></thead><tbody>
+    <tr><td><code>hard_rules.py</code></td><td>HR01–HR08’i uygular ve kanıtlı faz yolunu belirler.</td></tr>
+    <tr><td><code>metrics.py</code></td><td>M01–M06’yı ayrı hesaplama fonksiyonlarıyla üretir.</td></tr>
+    <tr><td><code>engine.py</code></td><td>Ürünleri dolaşır; kural, uyarı ve metrik sonuçlarını birleştirir.</td></tr>
+    <tr><td><code>run_benchmark.py</code></td><td>85 senaryoyu okur, kaynak beklentilerini kontrol eder ve sonuçları yazar.</td></tr>
+  </tbody></table>
+  <svg viewBox="0 0 650 170" width="100%" role="img" aria-label="Girdiden sonuçlara karar akışı">
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#176c77"/></marker></defs>
+    <g font-family="Arial" font-size="14" text-anchor="middle">
+      <rect x="2" y="50" width="135" height="65" rx="8" fill="#edf5f5"/><text x="69" y="77" fill="#182c3d">Ev · araç · kullanıcı</text><text x="69" y="98" fill="#182c3d">Wallbox kataloğu</text>
+      <path d="M140 83H176" stroke="#176c77" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="183" y="50" width="120" height="65" rx="8" fill="#176c77"/><text x="243" y="77" fill="white">Teknik kurallar</text><text x="243" y="98" fill="white">HR01–HR08</text>
+      <path d="M306 83H326M326 44V124" fill="none" stroke="#176c77" stroke-width="2"/>
+      <path d="M326 44H343M326 124H343" fill="none" stroke="#176c77" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="350" y="12" width="135" height="65" rx="8" fill="#edf5f5"/><text x="417" y="39" fill="#182c3d">DEGERLENDIR</text><text x="417" y="60" fill="#182c3d">M01–M06 hesapla</text>
+      <rect x="350" y="89" width="135" height="69" rx="8" fill="#f0f3f5"/><text x="417" y="112" fill="#182c3d">Diğer statüler</text><text x="417" y="133" fill="#182c3d">Ayrı listelere koy</text>
+      <path d="M489 44H520V82M489 124H520V82" fill="none" stroke="#176c77" stroke-width="2"/>
+      <path d="M520 82H541" fill="none" stroke="#176c77" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="548" y="50" width="100" height="65" rx="8" fill="#182c3d"/><text x="598" y="77" fill="white">Gerekçeli</text><text x="598" y="98" fill="white">sonuçlar</text>
+    </g>
+  </svg>
+  <p class="caption">Şekil 1. Her wallbox için uygulanan temel karar akışı.</p>
+  <h3>4.1. Ana fonksiyonun özeti</h3>
+  <pre><code>recommend_candidates(home, vehicle, user, wallboxes)
+
+Her wallbox için:
+    1. apply_hard_rules(...) ile teknik durumu bul.
+    2. Ürün kimliğini ve kural gerekçelerini kaydet.
+    3. Eksik bilgi uyarılarını ekle.
+    4. Durum DEGERLENDIR ise calculate_metrics(...) çağır.
+    5. Kaydı uygun sonuç listesine ekle.</code></pre>
+  <p>Çıktı dört liste içerir: <code>eligible</code>, <code>excluded</code>, <code>needs_verification</code> ve <code>insufficient_data</code>. Her kayıtta <code>charger_id</code>, kural sonucu ve uyarılar bulunur. <code>eligible</code> kayıtları ayrıca hesaplanabilen metrikleri taşır.</p>
+  <h3>4.2. Açıklanabilir karar</h3>
+  <p>Örneğin monofaz evde tek faz besleme desteği “Hayır” olan ürün, HR03 gerekçesiyle elenir. Destek “Bilinmiyor” ise ürün elenmez; doğrulama listesine ayrılır. Böylece kullanıcı yalnız sonucu değil, kararın nedenini de görebilir. Girdi kayıtları değiştirilmez; senaryo değişiklikleri kopyalara uygulanır.</p>
+  <div class="footer"><span>Şemadaki akış, mevcut Python kodundan özetlenmiştir</span><span>04 / 05</span></div>
+</article>
+
+<article class="page" id="p5">
+  <div class="running"><span>DENEY SONUÇLARI VE DEĞERLENDİRME</span><span>TEMEL MOTOR · V1</span></div>
+  <h2>5. Test sonuçları</h2>
+  <p>D1 normal veri akışını, D2 günlük talep ve park süresi stresini, D3 eksik veya belirsiz veriyi, D4 teknik sınırları sınar. Aday havuzları senaryoya göre değiştiği için her senaryoda 30 ürün çalıştırılmaz.</p>
+  <table><thead><tr><th>Grup</th><th class="num">Senaryo</th><th class="num">Değerlendir</th><th class="num">Ele</th><th class="num">Doğrulama</th><th class="num">Veri yetersiz</th></tr></thead><tbody>
+    <tr><td>D1</td><td class="num">25</td><td class="num">325</td><td class="num">52</td><td class="num">298</td><td class="num">0</td></tr>
+    <tr><td>D2</td><td class="num">20</td><td class="num">218</td><td class="num">40</td><td class="num">282</td><td class="num">0</td></tr>
+    <tr><td>D3</td><td class="num">20</td><td class="num">98</td><td class="num">22</td><td class="num">269</td><td class="num">9</td></tr>
+    <tr><td>D4</td><td class="num">20</td><td class="num">201</td><td class="num">28</td><td class="num">311</td><td class="num">0</td></tr>
+    <tr class="total"><td>Toplam</td><td class="num">85</td><td class="num">842</td><td class="num">142</td><td class="num">1.160</td><td class="num">9</td></tr>
+  </tbody></table>
+  <p class="caption">Tablo 1. 2.153 aday değerlendirmesinin dağılımı. Aynı ürün farklı senaryolarda tekrar değerlendirilir; bu sayı benzersiz ürün sayısı değildir.</p>
+  <div class="bar" aria-label="842 değerlendir, 142 ele, 1160 doğrulama, 9 veri yetersiz"><span style="width:39.1082%;background:#176c77"></span><span style="width:6.5954%;background:#b46851"></span><span style="width:53.8783%;background:#739bb1"></span><span style="width:.418%;background:#a9b2b9"></span></div>
+  <div class="legend"><span><b style="background:#176c77"></b>Değerlendir</span><span><b style="background:#b46851"></b>Ele</span><span><b style="background:#739bb1"></b>Doğrulama gerekli</span><span><b style="background:#a9b2b9"></b>Veri yetersiz</span></div>
+  <div class="callout"><p><strong>Kontrol sonucu:</strong> 2.683 otomatik kontrolün tamamı geçmiştir. Açık beklenen statüsü bulunan D4 testlerinde 19/19 eşleşme sağlanmıştır. Beklenen ELE ürünleri eligible listesine geçmemiştir. D4-020, genel uyarı metni nedeniyle ayrı bir HR06 semantik kontrolüyle doğrulanmıştır.</p></div>
+  <h3>5.1. Sonuçların yorumu ve sınırlar</h3>
+  <p>Doğrulama gereken sonuçların yüksek olması tek başına yazılım hatası değildir. Trifaz evde tek faz kurulum koşulları, belirsiz dış mekân uygunluğu veya ürün özelinde çapraz faz kanıtı eksikliği bu sonucu doğurabilir. Motor, bu durumlarda kesin uygunluk üretmek yerine belirsizliği görünür tutar.</p>
+  <p>Bu testler mevcut veri paketiyle sınırlıdır; bütün pazar ürünlerinin veya gerçek kurulumların doğruluğunu kanıtlamaz. Teknik tablodaki TC-20–TC-22, 85 senaryonun referansları arasında olmadığı için bu koşuda ayrı test olarak çalıştırılmamıştır. Katalogdaki üretici doğrulaması bekleyen kayıtlar ve iki araç güç tutarsızlığı uyarıları korunmuştur.</p>
+  <h3>6. Sonuç ve sonraki aşama</h3>
+  <p>Çalışma sonunda okunabilir, bağımsız çalışan ve gerekçe üreten bir temel KDS motoru elde edilmiştir. Sonraki aşamada kriterler ve ağırlıklar açıkça belirlendikten sonra sıralama katmanı eklenebilir. Mevcut sürümde AHP/TOPSIS, arayüz, API ve veritabanı uygulanmamıştır.</p>
+  <h3>Proje içi kaynaklar</h3>
+  <div class="refs">
+    <p>[1] HR01–HR08 sözlüğü ve teknik eşleşme taslağı; paket içindeki gerçek belge içerikleri.</p>
+    <p>[2] Araç ve wallbox çekirdek katalogları; “yeni dosya” teslim paketi, V1.</p>
+    <p>[3] Birleşik D1–D4 senaryoları ve kaynak teknik test tablosu.</p>
+    <p>[4] <code>kds_engine/</code> Python kaynakları; <code>results/summary.json</code>, <code>benchmark_results.csv</code> ve <code>candidate_results.json</code>.</p>
+  </div>
+  <div class="footer"><span>Bu rapor mevcut uygulama ve kaydedilmiş test sonuçlarına dayanır</span><span>05 / 05</span></div>
+</article>
+<script>
+const requestedPage = new URLSearchParams(location.search).get('page');
+if (requestedPage) {
+  document.body.classList.add('screen-single');
+  document.querySelectorAll('.page').forEach((p, i) => { if (i + 1 !== Number(requestedPage)) p.remove(); });
+}
+</script>
+</body>
+</html>
