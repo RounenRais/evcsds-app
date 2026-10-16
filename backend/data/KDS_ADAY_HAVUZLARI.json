@@ -1,0 +1,87 @@
+{
+    "version":  "V1_REBUILT",
+    "pools":  {
+                  "POOL_ALL":  {
+                                   "description":  "30 wallboxın tamamı",
+                                   "count":  30,
+                                   "charger_ids":  [
+                                                       "TESLA_WALL_CONNECTOR_GEN3_TR_22_T2_7M3",
+                                                       "VESTEL_EVC04_AC22_T2P_TR",
+                                                       "ABB_TERRA_AC_W22_SR_0_TR",
+                                                       "WALLBOX_PULSAR_PLUS_22_T2_5M_EU",
+                                                       "SCHNEIDER_CHARGE_EVH5A22N2S_EU",
+                                                       "ZAPTEC_GO_7_4_UK",
+                                                       "EASEE_CHARGE_UP_22_EU",
+                                                       "GOE_CHARGER_GEMINI_11_TR",
+                                                       "HEIDELBERG_HOME_ECO_11_EU_5M",
+                                                       "ARCELIK_AR_AW32_RFID_7_4_TR",
+                                                       "MERCEDES_WALLBOX_A0009063312_EU_22_T2S",
+                                                       "ELLI_CHARGER_CONNECT_2_11_4M5_EU",
+                                                       "MENNEKES_AMTRON_4YOU_300_11_T2S_EU",
+                                                       "KEBA_KECONTACT_P40_11_T2_6M_EU",
+                                                       "AUTEL_MAXICHARGER_AC_W22_C5_4G_EU_TR",
+                                                       "FRONIUS_WATTPILOT_HOME_11J_EU",
+                                                       "SMA_EV_CHARGER_7_4_1AC_5M_EU",
+                                                       "MYENERGI_ZAPPI_V2_1_7_T2_6M5_EU",
+                                                       "EO_MINI_PRO_3_7_2_T2_5M_UK",
+                                                       "OHME_HOME_PRO_7_4_T2_5M_EU",
+                                                       "CIRCONTROL_EHOME5_S_7_4_T2S_EU",
+                                                       "WALLBOX_COPPER_SB_22_T2S_EU",
+                                                       "ALFEN_EVE_SINGLE_SLINE_904460623_11_T2S_EU",
+                                                       "HAGER_WITTY_START_XEV1K07T2_7_4_EU",
+                                                       "LEGRAND_GREENUP_ONE_057012_7_4_T2_5M_EU",
+                                                       "BOSCH_POWER_CHARGE_7000I_11_T2_5M_EU",
+                                                       "ABL_EMH1_1W11D1_11_T2_6M_EU",
+                                                       "DELTA_AC_MAX_BASIC_22_T2_5M_EU",
+                                                       "CHARGE_AMPS_HALO_130578_11_T2_7M5_EU",
+                                                       "COMPLEO_EBOX_SMART_22_T2S_EU"
+                                                   ]
+                               },
+                  "POOL_TEKNIK_27":  {
+                                         "description":  "KDS teknik değerlendirmesinde kullanılabilir ürünler",
+                                         "count":  27,
+                                         "charger_ids":  [
+                                                             "TESLA_WALL_CONNECTOR_GEN3_TR_22_T2_7M3",
+                                                             "VESTEL_EVC04_AC22_T2P_TR",
+                                                             "ABB_TERRA_AC_W22_SR_0_TR",
+                                                             "WALLBOX_PULSAR_PLUS_22_T2_5M_EU",
+                                                             "SCHNEIDER_CHARGE_EVH5A22N2S_EU",
+                                                             "ZAPTEC_GO_7_4_UK",
+                                                             "EASEE_CHARGE_UP_22_EU",
+                                                             "GOE_CHARGER_GEMINI_11_TR",
+                                                             "HEIDELBERG_HOME_ECO_11_EU_5M",
+                                                             "ARCELIK_AR_AW32_RFID_7_4_TR",
+                                                             "MERCEDES_WALLBOX_A0009063312_EU_22_T2S",
+                                                             "ELLI_CHARGER_CONNECT_2_11_4M5_EU",
+                                                             "MENNEKES_AMTRON_4YOU_300_11_T2S_EU",
+                                                             "AUTEL_MAXICHARGER_AC_W22_C5_4G_EU_TR",
+                                                             "FRONIUS_WATTPILOT_HOME_11J_EU",
+                                                             "SMA_EV_CHARGER_7_4_1AC_5M_EU",
+                                                             "MYENERGI_ZAPPI_V2_1_7_T2_6M5_EU",
+                                                             "OHME_HOME_PRO_7_4_T2_5M_EU",
+                                                             "CIRCONTROL_EHOME5_S_7_4_T2S_EU",
+                                                             "WALLBOX_COPPER_SB_22_T2S_EU",
+                                                             "HAGER_WITTY_START_XEV1K07T2_7_4_EU",
+                                                             "LEGRAND_GREENUP_ONE_057012_7_4_T2_5M_EU",
+                                                             "BOSCH_POWER_CHARGE_7000I_11_T2_5M_EU",
+                                                             "ABL_EMH1_1W11D1_11_T2_6M_EU",
+                                                             "DELTA_AC_MAX_BASIC_22_T2_5M_EU",
+                                                             "CHARGE_AMPS_HALO_130578_11_T2_7M5_EU",
+                                                             "COMPLEO_EBOX_SMART_22_T2S_EU"
+                                                         ]
+                                     },
+                  "POOL_FIYAT_BILINEN":  {
+                                             "description":  "Fiyat bilgisi bulunan ürünler",
+                                             "count":  7,
+                                             "charger_ids":  [
+                                                                 "TESLA_WALL_CONNECTOR_GEN3_TR_22_T2_7M3",
+                                                                 "VESTEL_EVC04_AC22_T2P_TR",
+                                                                 "ABB_TERRA_AC_W22_SR_0_TR",
+                                                                 "WALLBOX_PULSAR_PLUS_22_T2_5M_EU",
+                                                                 "SCHNEIDER_CHARGE_EVH5A22N2S_EU",
+                                                                 "ARCELIK_AR_AW32_RFID_7_4_TR",
+                                                                 "AUTEL_MAXICHARGER_AC_W22_C5_4G_EU_TR"
+                                                             ]
+                                         }
+              }
+}

@@ -1,0 +1,13 @@
+ornek_id,gorsel_yolu,bagimsiz_test,fatura_var,sozlesme_gucu_kw_durum,sozlesme_gucu_kw,donem_tuketimi_kwh_durum,donem_tuketimi_kwh,tarife_durum,tarife,etiket_kaynagi,gunluk_tuketim_notu
+syctest0,testimagelast/syctest0.jpg,bilinmiyor,evet,dogrulandi,7.13,dogrulanmadi,,dogrulandi,mesken_tek_zamanli_alcak_gerilim,kullanici_gorsel_okumasi,2021=9.718;2022=22.666 kWh/gun
+syctest1,testimagelast/syctest1.jpg,bilinmiyor,evet,dogrulandi,9.040,dogrulanmadi,,dogrulandi,mesken_tek_zamanli_alcak_gerilim,kullanici_gorsel_okumasi,donem_toplami_kullanici_tarafindan_bulunamadi
+syctest2,testimagelast/syctest2.jpg,bilinmiyor,evet,dogrulandi,5.01,dogrulanmadi,,dogrulandi,mesken_tek_zamanli_alcak_gerilim,kullanici_gorsel_okumasi,2023=16.62;2024=21.74 kWh/gun
+syctest3,testimagelast/syctest3.jpg,bilinmiyor,evet,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,,
+syctest4,testimagelast/syctest4.jpg,bilinmiyor,evet,dogrulandi,6.408,dogrulanmadi,,dogrulandi,mesken_tek_zamanli_alcak_gerilim,kullanici_gorsel_okumasi,2023=6.558;2024=11.229 kWh/gun
+syctest5,testimagelast/syctest5.png,bilinmiyor,evet,dogrulandi,6.09,dogrulanmadi,,dogrulanmadi,,kullanici_gorsel_okumasi,2023=25.689;2024=41.761 kWh/gun;tarife_gorunmuyor
+syctest6,testimagelast/syctest6.png,bilinmiyor,evet,dogrulandi,6.09,dogrulanmadi,,dogrulanmadi,,kullanici_gorsel_okumasi,2023=25.689;2024=42.369 kWh/gun;tarife_gorunmuyor
+syctest7,testimagelast/syctest7.jpg,bilinmiyor,evet,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,kullanici_gorsel_okumasi,cari_yil=7.189;onceki_yil=7.064 kWh/gun;guc_3000_birimi_belirsiz
+negative0,bill_scene_dataset/test/images/negative_0000.jpg,hayir,hayir,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,gorsel_inceleme,
+negative1,bill_scene_dataset/test/images/negative_0001.jpg,hayir,hayir,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,gorsel_inceleme,
+negative2,bill_scene_dataset/test/images/negative_0002.jpg,hayir,hayir,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,gorsel_inceleme,
+negative3,bill_scene_dataset/test/images/negative_0003.jpg,hayir,hayir,dogrulanmadi,,dogrulanmadi,,dogrulanmadi,,gorsel_inceleme,

@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* Tasarım belirteçleri. Durum renkleri renk körlüğü doğrulamasından geçmiştir
+   (yeşil/amber/kırmızı/nötr dörtlüsü, CVD ΔE ≥ 8 ve normal görüş ΔE ≥ 15).
+   Renk hiçbir yerde tek başına anlam taşımaz: her durumun ikonu ve yazısı vardır. */
+@theme inline {
+  --color-kagit: #f7f6f3;
+  --color-kart: #ffffff;
+  --color-cizgi: #e6e4df;
+  --color-cizgi-koyu: #d6d3cc;
+
+  --color-murekkep: #15171a;
+  --color-murekkep-2: #5b6069;
+  --color-murekkep-3: #6a7079;
+
+  --color-vurgu: #2a5bd7;
+  --color-vurgu-koyu: #1f47b8;
+  --color-vurgu-acik: #eef2fd;
+
+  --color-uygun: #107a57;
+  --color-uygun-yazi: #0b5e42;
+  --color-uygun-acik: #e8f5ef;
+
+  --color-uyari: #e0a020;
+  --color-uyari-yazi: #8a5a00;
+  --color-uyari-acik: #fcf3e0;
+
+  --color-elenen: #b52d20;
+  --color-elenen-yazi: #99231a;
+  --color-elenen-acik: #fcedeb;
+
+  --color-notr: #6e747e;
+  --color-notr-acik: #f0efec;
+
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--color-kagit);
+  color: var(--color-murekkep);
+}
+
+/* Klavyeyle gezinenler için her etkileşimli öğede görünür odak halkası. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-vurgu);
+  outline-offset: 2px;
+}

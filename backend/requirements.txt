@@ -1,0 +1,9 @@
+# Çekirdek bağımlılıklar: API, katalog ve karar motoru bunlarla çalışır.
+# Karar motorunun kendisi (kds_engine/) harici paket kullanmaz.
+# Görsel analiz için ayrıca requirements-vision.txt kurulmalıdır.
+
+fastapi==0.135.1
+uvicorn[standard]==0.41.0
+python-multipart==0.0.22
+Pillow==12.2.0
+rapidfuzz==3.14.5

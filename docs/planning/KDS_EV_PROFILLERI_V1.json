@@ -1,0 +1,152 @@
+[
+  {
+    "home_profile_id": "HOME_M01_DUSUK",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 3.0,
+    "donem_tuketimi_kwh": 150.0,
+    "gunluk_ortalama_kwh": 5.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Düşük tüketim ve düşük sözleşme gücü kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_M02_ORTA",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 5.0,
+    "donem_tuketimi_kwh": 240.0,
+    "gunluk_ortalama_kwh": 8.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Orta-alt tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_M03_ORTA",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 7.0,
+    "donem_tuketimi_kwh": 360.0,
+    "gunluk_ortalama_kwh": 12.0,
+    "tarife": "mesken_cok_zamanli_alcak_gerilim",
+    "profil_amaci": "Orta tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_M04_YUKSEK",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 9.0,
+    "donem_tuketimi_kwh": 540.0,
+    "gunluk_ortalama_kwh": 18.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Yüksek tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_M05_YUKSEK",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 12.0,
+    "donem_tuketimi_kwh": 750.0,
+    "gunluk_ortalama_kwh": 25.0,
+    "tarife": "mesken_cok_zamanli_alcak_gerilim",
+    "profil_amaci": "Yüksek tüketim ve sözleşme bağlamı",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_M06_SINIR",
+    "faz": "monofaz",
+    "sozlesme_gucu_kw": 15.0,
+    "donem_tuketimi_kwh": 1050.0,
+    "gunluk_ortalama_kwh": 35.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Monofaz yüksek sınır/stres seviyesi; tesisat kapasitesi değildir",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T01_DUSUK",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 6.0,
+    "donem_tuketimi_kwh": 180.0,
+    "gunluk_ortalama_kwh": 6.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz düşük tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T02_ORTA",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 9.0,
+    "donem_tuketimi_kwh": 300.0,
+    "gunluk_ortalama_kwh": 10.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz orta-alt tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T03_ORTA",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 12.0,
+    "donem_tuketimi_kwh": 450.0,
+    "gunluk_ortalama_kwh": 15.0,
+    "tarife": "mesken_cok_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz orta tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T04_YUKSEK",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 15.0,
+    "donem_tuketimi_kwh": 600.0,
+    "gunluk_ortalama_kwh": 20.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz yüksek tüketim kontrollü seviyesi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T05_YUKSEK",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 18.0,
+    "donem_tuketimi_kwh": 900.0,
+    "gunluk_ortalama_kwh": 30.0,
+    "tarife": "mesken_cok_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz yüksek tüketim ve sözleşme bağlamı",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_T06_SINIR",
+    "faz": "trifaz",
+    "sozlesme_gucu_kw": 24.0,
+    "donem_tuketimi_kwh": 1200.0,
+    "gunluk_ortalama_kwh": 40.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Trifaz yüksek sınır/stres seviyesi; tesisat kapasitesi değildir",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_B01_DUSUK",
+    "faz": "belirsiz",
+    "sozlesme_gucu_kw": 3.0,
+    "donem_tuketimi_kwh": 210.0,
+    "gunluk_ortalama_kwh": 7.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Faz bilgisi belirsiz düşük tüketim veri kalitesi testi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_B02_ORTA",
+    "faz": "belirsiz",
+    "sozlesme_gucu_kw": 9.0,
+    "donem_tuketimi_kwh": 480.0,
+    "gunluk_ortalama_kwh": 16.0,
+    "tarife": "mesken_cok_zamanli_alcak_gerilim",
+    "profil_amaci": "Faz bilgisi belirsiz orta tüketim veri kalitesi testi",
+    "veri_tipi": "Sentetik deney profili"
+  },
+  {
+    "home_profile_id": "HOME_B03_YUKSEK",
+    "faz": "belirsiz",
+    "sozlesme_gucu_kw": 15.0,
+    "donem_tuketimi_kwh": 900.0,
+    "gunluk_ortalama_kwh": 30.0,
+    "tarife": "mesken_tek_zamanli_alcak_gerilim",
+    "profil_amaci": "Faz bilgisi belirsiz yüksek tüketim veri kalitesi testi",
+    "veri_tipi": "Sentetik deney profili"
+  }
+]

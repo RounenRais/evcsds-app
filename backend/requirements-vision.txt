@@ -1,0 +1,13 @@
+# Görsel analiz katmanı (vision/) için ek bağımlılıklar.
+# Birkaç GB yer kaplar ve CUDA sürümüne bağlıdır. Yalnız /analyze/* uçlarını
+# kullanacaksanız kurun; katalog ve /recommend uçları bunlarsız da çalışır.
+#
+# Kurulum:  pip install -r requirements.txt -r requirements-vision.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+torch==2.11.0+cu130
+ultralytics==8.4.33
+opencv-python==4.13.0.92
+paddleocr==3.4.0
+paddlepaddle==3.3.1
