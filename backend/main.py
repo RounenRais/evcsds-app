@@ -23,7 +23,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from fastapi import FastAPI, File, Header, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -32,7 +32,7 @@ os.environ.setdefault("YOLO_AUTOINSTALL", "false")
 
 import catalog
 import recommend
-from key_utils import key_gecerli_mi, key_sahibi, key_uret
+from key_utils import key_dogrula, key_uret
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -96,10 +96,11 @@ def gorsel_katmani() -> dict[str, Any]:
         from vision.predict_and_ocr import MODEL_PATH as sayac_modeli
         from vision.predict_and_ocr import sayac_analiz_et
     except Exception as hata:  # ImportError, FileNotFoundError, OSError...
+        # Ayrıntı yalnız sunucu günlüğüne yazılır: özgün hata metni dosya
+        # yollarını ve kurulum ayrıntılarını taşıyabilir.
         _gorsel_hatasi = (
             "Görsel analiz katmanı bu kurulumda kullanılamıyor. "
-            "requirements-vision.txt bağımlılıkları ve backend/models altındaki "
-            f"model ağırlıkları gerekir. Ayrıntı: {hata}"
+            "requirements-vision.txt bağımlılıkları ve model ağırlıkları gerekir."
         )
         logger.exception("Görsel analiz katmanı yüklenemedi")
         raise HTTPException(status_code=503, detail=_gorsel_hatasi) from hata
@@ -140,9 +141,23 @@ def api_key_dogrula(api_key: str | None) -> str:
         raise HTTPException(
             status_code=401, detail="API key gerekli. X-API-Key header'ını gönderin."
         )
-    if not key_gecerli_mi(api_key):
+    sahip = key_dogrula(api_key)
+    if sahip is None:
         raise HTTPException(status_code=401, detail="Geçersiz API key.")
-    return key_sahibi(api_key) or "bilinmeyen"
+    return sahip
+
+
+def api_key_gerekli(
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+) -> str:
+    """Kimlik kontrolünü gövde doğrulamasından önce çalıştırır.
+
+    Anahtar doğrudan uç nokta gövdesinde kontrol edilseydi FastAPI önce
+    dosya alanlarını doğrular ve kimliksiz çağırana 401 yerine 422 ile
+    birlikte uç noktanın şemasını gösterirdi. Bağımlılıklar gövde
+    alanlarından önce çözüldüğü için kapı burada kapanır.
+    """
+    return api_key_dogrula(x_api_key)
 
 
 # --------------------------------------------------------------------------
@@ -151,11 +166,10 @@ def api_key_dogrula(api_key: str | None) -> str:
 
 async def _gorsel_analiz_et(
     file: UploadFile,
-    x_api_key: str | None,
+    kullanici: str,
     analiz_adi: str,
     analiz_turu: str,
 ) -> dict:
-    kullanici = api_key_dogrula(x_api_key)
     gorsel = gorsel_katmani()
     analiz_fonksiyonu: Callable[[str | Path], dict] = gorsel[analiz_adi]
     gecici_yol: Path | None = None
@@ -197,31 +211,30 @@ async def _gorsel_analiz_et(
 @app.post("/analyze/meter")
 async def analyze_meter(
     file: UploadFile = File(...),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    kullanici: str = Depends(api_key_gerekli),
 ) -> dict:
-    return await _gorsel_analiz_et(file, x_api_key, "sayac_analiz_et", "sayac")
+    return await _gorsel_analiz_et(file, kullanici, "sayac_analiz_et", "sayac")
 
 
 @app.post("/analyze/bill")
 async def analyze_bill(
     file: UploadFile = File(...),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    kullanici: str = Depends(api_key_gerekli),
 ) -> dict:
-    return await _gorsel_analiz_et(file, x_api_key, "fatura_analiz_et", "fatura")
+    return await _gorsel_analiz_et(file, kullanici, "fatura_analiz_et", "fatura")
 
 
 @app.post("/analyze/home")
 async def analyze_home(
     meter_file: UploadFile = File(...),
     bill_file: UploadFile = File(...),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    kullanici: str = Depends(api_key_gerekli),
 ) -> dict:
     """İki görselden KDS ev girdisi üretir; ham OCR metinlerini döndürmez."""
-    api_key_dogrula(x_api_key)
     gorsel = gorsel_katmani()
     baslangic = time.perf_counter()
-    sayac_sonucu = await _gorsel_analiz_et(meter_file, x_api_key, "sayac_analiz_et", "sayac")
-    fatura_sonucu = await _gorsel_analiz_et(bill_file, x_api_key, "fatura_analiz_et", "fatura")
+    sayac_sonucu = await _gorsel_analiz_et(meter_file, kullanici, "sayac_analiz_et", "sayac")
+    fatura_sonucu = await _gorsel_analiz_et(bill_file, kullanici, "fatura_analiz_et", "fatura")
     sonuc = gorsel["kds_ev_girdisi_olustur"](sayac_sonucu, fatura_sonucu)
     sonuc["islem_suresi_ms"] = round((time.perf_counter() - baslangic) * 1000)
     return sonuc
@@ -231,6 +244,15 @@ async def analyze_home(
 # Katalog uçları
 # --------------------------------------------------------------------------
 
+def _katalog_hatasi(hata: Exception) -> HTTPException:
+    """Katalog hatasının ayrıntısını günlüğe yazar, istemciye genel mesaj döner.
+
+    Özgün metin dosya yollarını taşıdığı için yanıta konmaz.
+    """
+    logger.error("Katalog okunamadı: %s", hata)
+    return HTTPException(status_code=500, detail="Katalog şu anda okunamıyor.")
+
+
 @app.get("/catalog/vehicles")
 def catalog_vehicles(
     q: str | None = Query(default=None, max_length=100, description="Marka veya model araması"),
@@ -239,7 +261,7 @@ def catalog_vehicles(
     try:
         kayitlar = catalog.arac_listesi(q, limit)
     except catalog.KatalogHatasi as hata:
-        raise HTTPException(status_code=500, detail=str(hata)) from hata
+        raise _katalog_hatasi(hata) from hata
     return {"sayi": len(kayitlar), "araclar": kayitlar}
 
 
@@ -248,7 +270,7 @@ def catalog_wallboxes() -> dict:
     try:
         kayitlar = catalog.wallbox_listesi()
     except catalog.KatalogHatasi as hata:
-        raise HTTPException(status_code=500, detail=str(hata)) from hata
+        raise _katalog_hatasi(hata) from hata
     return {"sayi": len(kayitlar), "wallboxlar": kayitlar}
 
 
@@ -296,7 +318,7 @@ def recommend_endpoint(istek: OneriIstegi) -> dict:
     except recommend.OneriGirdiHatasi as hata:
         raise HTTPException(status_code=400, detail=str(hata)) from hata
     except catalog.KatalogHatasi as hata:
-        raise HTTPException(status_code=500, detail=str(hata)) from hata
+        raise _katalog_hatasi(hata) from hata
     except ValueError as hata:
         # Motorun kendi NEED_INPUT / tekrarlı charger_id kontrolleri.
         logger.warning("Motor girdiyi reddetti: %s", hata)

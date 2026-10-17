@@ -38,11 +38,25 @@ def key_uret(kullanici_adi: str) -> str:
 
 def key_gecerli_mi(api_key: str) -> bool:
     """Gelen key keys.json'da var mı kontrol eder."""
-    keys = keys_yukle()
-    return api_key in keys
+    return key_dogrula(api_key) is not None
 
 
 def key_sahibi(api_key: str) -> str | None:
     """Key'in sahibini döndürür. Key yoksa None döner."""
-    keys = keys_yukle()
-    return keys.get(api_key)
+    return key_dogrula(api_key)
+
+
+def key_dogrula(api_key: str) -> str | None:
+    """Anahtarı doğrular ve sahibini döndürür; geçersizse None.
+
+    Dosya istek başına bir kez okunur. Karşılaştırma `compare_digest` ile
+    yapılır ve eşleşme bulunsa da döngü kısa devre yapmaz; böylece yanıt
+    süresi hangi anahtarın denendiğine göre değişmez.
+    """
+    if not api_key:
+        return None
+    sahip: str | None = None
+    for kayitli, kayitli_sahip in keys_yukle().items():
+        if secrets.compare_digest(api_key, kayitli):
+            sahip = kayitli_sahip
+    return sahip
