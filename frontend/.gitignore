@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Örnek dosya depoda durmalı: kurulumda .env.local bundan kopyalanır.
+!.env.example
 
 # vercel
 .vercel

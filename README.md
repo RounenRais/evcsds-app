@@ -37,6 +37,25 @@ docs/              Kural sözlükleri, metrik tanımları, veri raporları
 
 ## Kurulum
 
+### Tek komutla
+
+Depo kökünde:
+
+```powershell
+.\kur.ps1              # Windows — kurar ve başlatır
+```
+
+```bash
+./kur.sh                # macOS / Linux
+```
+
+Seçenekler: `-SadeceKur` / `--sadece-kur` yalnız kurar, `-Backend` / `--backend`
+frontend'i atlar (npm indirmesi gerekmez). Script sanal ortamı kurar,
+`keys.json` ve `.env.local` dosyalarını oluşturur, motoru 85 senaryoyla
+doğrular ve sunucuları başlatır.
+
+Aşağıdaki adımlar aynı işin elle yapılışıdır.
+
 ### Backend
 
 ```bash
