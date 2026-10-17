@@ -179,3 +179,12 @@ export const paraTl = (deger: number | null | undefined): string =>
 
 export const yuzde = (oran: number | null | undefined): string =>
   oran === null || oran === undefined ? "—" : `%${Math.round(oran * 100)}`;
+
+/** Güç değerleri tek ondalıkla sabit yazılır: 11 yerine 11,0. */
+export const gucKw = (deger: number | null | undefined): string =>
+  deger === null || deger === undefined
+    ? "—"
+    : new Intl.NumberFormat("tr-TR", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }).format(deger);

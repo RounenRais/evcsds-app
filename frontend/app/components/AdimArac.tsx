@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { aracAra, sayi, type Arac, type Kullanim, type KurulumYeri } from "../lib/api";
+import { aracAra, gucKw, sayi, type Arac, type Kullanim, type KurulumYeri } from "../lib/api";
 import MarkaIsareti from "./MarkaIsareti";
 import { Dugme, Ok, Unlem } from "./Cerceve";
 
@@ -44,7 +44,7 @@ function AracKarti({
         <div className="min-w-0">
           <dt className="text-[11.5px] text-murekkep-3 mb-0.5">AC azami</dt>
           <dd className="m-0 font-mono text-[17px] font-semibold whitespace-nowrap">
-            {sayi(ac, "kW")}
+            {gucKw(ac)} kW
           </dd>
         </div>
         <div className="min-w-0">

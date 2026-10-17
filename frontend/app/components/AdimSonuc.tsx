@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  gucKw,
   paraTl,
   sayi,
   yuzde,
@@ -64,48 +65,71 @@ function FiyatGrafigi({ adaylar, butce }: { adaylar: Aday[]; butce: number | nul
         {butce !== null && " Dikey çizgi bütçenizi gösterir."}
       </p>
 
-      <div className="relative">
-        {butce !== null && butce > 0 && (
-          <div
-            className="absolute top-0 bottom-6 w-0.5 bg-elenen z-10"
-            style={{ left: `calc(${(butce / olcek) * 100}% )` }}
-            aria-hidden="true"
-          />
-        )}
-        <div className="flex flex-col gap-3.5">
+      {/* Üç sütun: ad — çubuk — fiyat. Bütçe çizgisi yalnız çubuk sütununa
+          göre konumlanır; etiket genişliği ölçeğe karışmaz. */}
+      <div className="flex gap-3">
+        {/* Hizalama text-align ile yapılır: flex + justify-end kullanılsaydı
+            taşan ad baştan kırpılır, marka adı kaybolurdu. */}
+        <div className="hidden sm:flex w-[200px] flex-none flex-col gap-3.5">
+          {fiyatli.map((aday) => (
+            <div
+              key={aday.charger_id}
+              className="h-[26px] leading-[26px] text-right truncate text-[14.5px] font-medium"
+              title={`${aday.urun.marka} ${aday.urun.model}`}
+            >
+              {aday.urun.marka} {aday.urun.model}
+            </div>
+          ))}
+        </div>
+
+        <div className="relative flex-1 min-w-0 flex flex-col gap-3.5">
+          {butce !== null && butce > 0 && (
+            <div
+              className="absolute inset-y-0 w-0.5 bg-elenen z-10"
+              style={{ left: `${(butce / olcek) * 100}%` }}
+              aria-hidden="true"
+            />
+          )}
           {fiyatli.map((aday) => {
             const fiyat = aday.urun.fiyat_tl ?? 0;
             const asti = butce !== null && fiyat > butce;
             return (
-              <div key={aday.charger_id} className="flex flex-wrap items-center gap-3">
-                <div className="basis-[170px] grow-0 shrink-0 min-w-0 text-[14.5px] font-medium truncate sm:text-right">
-                  {aday.urun.marka} {aday.urun.model}
-                </div>
-                <div className="flex-1 basis-[240px] min-w-0 flex items-center gap-3">
-                  <div className="flex-1 min-w-0 h-[26px] bg-[#f4f3ef] rounded-[5px]">
-                    <div
-                      className={`h-full rounded-[5px] ${asti ? "bg-[#aec0ec]" : "bg-vurgu"}`}
-                      style={{ width: `${(fiyat / olcek) * 100}%` }}
-                    />
-                  </div>
-                  <span
-                    className={`flex-none font-mono text-sm font-semibold w-[98px] text-right ${
-                      asti ? "text-elenen-yazi" : ""
-                    }`}
-                  >
-                    {paraTl(fiyat)}
-                  </span>
-                </div>
+              <div key={aday.charger_id} className="h-[26px] bg-[#f4f3ef] rounded-[5px]">
+                <div
+                  className={`h-full rounded-[5px] ${asti ? "bg-[#aec0ec]" : "bg-vurgu"}`}
+                  style={{ width: `${(fiyat / olcek) * 100}%` }}
+                />
               </div>
             );
           })}
         </div>
-        {butce !== null && butce > 0 && (
-          <p className="m-0 mt-2 font-mono text-xs font-semibold text-elenen-yazi">
-            bütçeniz {paraTl(butce)}
-          </p>
-        )}
+
+        <div className="w-[104px] flex-none flex flex-col gap-3.5">
+          {fiyatli.map((aday) => {
+            const fiyat = aday.urun.fiyat_tl ?? 0;
+            const asti = butce !== null && fiyat > butce;
+            return (
+              <div
+                key={aday.charger_id}
+                className={`h-[26px] flex items-center justify-end font-mono text-sm font-semibold ${
+                  asti ? "text-elenen-yazi" : ""
+                }`}
+              >
+                <span className="sm:hidden mr-auto text-[13px] font-sans font-medium truncate">
+                  {aday.urun.marka}
+                </span>
+                {paraTl(fiyat)}
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {butce !== null && butce > 0 && (
+        <p className="m-0 mt-3 font-mono text-xs font-semibold text-elenen-yazi">
+          kırmızı çizgi: bütçeniz {paraTl(butce)}
+        </p>
+      )}
 
       {fiyatsizSayisi > 0 && (
         <p className="m-0 mt-4 text-sm leading-relaxed text-murekkep-3">
@@ -132,7 +156,9 @@ function AdayKarti({ aday }: { aday: Aday }) {
         <div className="text-[17px] font-semibold leading-tight tracking-tight mt-0.5">
           {aday.urun.model}
         </div>
-        {aday.gerekceler.length > 0 && (
+        {/* Uygun ürünlerde tek gerekçe HR08'dir; o genel uyarı sayfa altında
+            bir kez yazılır, her kartta tekrarlanmaz. */}
+        {aday.durum !== "DEGERLENDIR" && aday.gerekceler.length > 0 && (
           <p className="mt-1.5 mb-0 text-sm leading-snug text-uyari-yazi">
             {aday.gerekceler[0]}
           </p>
@@ -196,7 +222,7 @@ export default function AdimSonuc({
             </div>
             <div className="flex items-baseline gap-2.5 mb-4">
               <span className="font-mono text-6xl sm:text-[76px] font-semibold leading-none tracking-[-0.04em]">
-                {guc === null ? "—" : sayi(guc)}
+                {gucKw(guc)}
               </span>
               <span className="text-2xl sm:text-[28px] font-medium text-murekkep-2">kW</span>
             </div>
